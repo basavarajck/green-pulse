@@ -1,5 +1,5 @@
 import React from 'react'
-
+  
 const Hero = () => {
   return (
     <main className="flex flex-1 items-center py-10">
