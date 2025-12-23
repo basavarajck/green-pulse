@@ -1,21 +1,52 @@
 // src/components/events/EventCard.jsx
-import React from 'react';
+import React, {useState} from 'react';
 import { ExternalLink, Trash2 } from 'lucide-react';
 import { isAdmin } from '../../utils/auth';
 
 const EventCard = ({ event, onDelete, onEdit }) => {
   const { _id, title, description, date, image, link, isUpcoming } = event;
+  const [imageError, setImageError] = useState(false);
+
+
+  const handleImageError = () => {
+    setImageError(true);
+    console.log('Image failed to load:', image); // 👈 Debug
+  };
+
+  const getImageUrl = (url) => {
+    if (!url) return null;
+    
+    // Google Drive: Convert sharing link to direct image
+    if (url.includes('drive.google.com')) {
+      const fileId = url.match(/\/d\/([a-zA-Z0-9-_]+)/)?.[1];
+      if (fileId) {
+        return `https://drive.google.com/uc?export=view&id=${fileId}`;
+      }
+    }
+    
+    // Already direct image URL
+    return url;
+  };
+
 
   return (
     <div className="group rounded-2xl border border-green-900/50 bg-gradient-to-br from-gray-950/80 to-black/50 p-6 shadow-2xl shadow-green-900/20 backdrop-blur-sm hover:border-green-500/70 hover:shadow-green-500/30 transition-all duration-300">
       {/* Image */}
-      {image && (
-        <div className="mb-6">
+      {image && !imageError ? (
+        <div className="mb-3 relative group">
           <img
             src={image}
             alt={title}
-            className="h-48 w-full rounded-xl object-cover shadow-2xl group-hover:scale-[1.02] transition-transform duration-300"
+            onError={handleImageError}
+            loading="lazy"
+            className="h-40 w-full rounded-lg object-cover hover:brightness-105 transition-all duration-300 group-hover:scale-[1.02]"
           />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent rounded-lg opacity-0 group-hover:opacity-100 transition-opacity"></div>
+        </div>
+      ) : (
+        <div className="h-40 w-full rounded-lg bg-gradient-to-br from-green-900/60 to-emerald-900/60 flex items-center justify-center mb-3 border-2 border-dashed border-green-700/50">
+          <Calendar className="w-10 h-10 text-green-400" />
+          <span className="ml-2 text-sm text-green-300 font-medium">No Image</span>
         </div>
       )}
 
@@ -47,16 +78,16 @@ const EventCard = ({ event, onDelete, onEdit }) => {
 
       {/* Link Button */}
       {link && (
-        <a
-          href={link}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex items-center gap-2 mb-4 px-4 py-2 rounded-lg bg-green-900/50 border border-green-700/50 text-green-200 text-sm font-medium hover:bg-green-800/70 hover:border-green-500/70 transition-all duration-200"
-        >
-          Register Now
-          <ExternalLink className="w-4 h-4" />
-        </a>
-      )}
+      <a
+        href={link}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="inline-flex items-center gap-2 mb-4 px-4 py-2 rounded-lg bg-green-900/50 border border-green-700/50 text-green-200 text-sm font-medium hover:bg-green-800/70 hover:border-green-500/70 transition-all duration-200"
+      >
+        Register Now
+        <ExternalLink className="w-4 h-4" />
+      </a>
+    )}
 
       {/* Admin Controls */}
       {isAdmin() && (

@@ -20,10 +20,10 @@ const Hero = () => {
 
         <div className="flex gap-4 pt-2">
           <button
-            className="rounded-md bg-green-500 px-4 py-2 text-sm font-semibold text-green-950 cursor-pointer"
-            onClick={() =>
-              document.getElementById('events')?.scrollIntoView({ behavior: 'smooth' })
-            }
+            className="rounded-md bg-green-500 px-4 py-2 text-sm font-semibold text-green-950 cursor-pointer hover:bg-green-400 transition-colors"
+            onClick={() => {
+              window.location.href = '/events?upcoming=true';
+            }}
           >
             See upcoming events
           </button>

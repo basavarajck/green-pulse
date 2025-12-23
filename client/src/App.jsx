@@ -12,6 +12,7 @@ import AnnouncementsPage from './pages/AnnouncementsPage';
 import ProjectsPage from './pages/ProjectsPage';  
 import BlogsPage from './pages/BlogsPage';  
 import BlogDetailPage from './pages/BlogDetailPage';
+import ProtectedRoute from './components/ProtectedRoute';
 function App() {
   return (
     <BrowserRouter>
@@ -20,9 +21,30 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/login/success" element={<LoginSuccess />} />
-        <Route path="/events" element={<EventsPage />} />
-        <Route path="/announcements" element={<AnnouncementsPage />} />   
-        <Route path="/projects" element={<ProjectsPage />} />
+        <Route 
+          path="/events" 
+          element={
+            <ProtectedRoute>
+              <EventsPage />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/announcements" 
+          element={
+            <ProtectedRoute>
+              <AnnouncementsPage />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/projects" 
+          element={
+            <ProtectedRoute>
+              <ProjectsPage />
+            </ProtectedRoute>
+          } 
+        />
         <Route path="/blogs" element={<BlogsPage />} />  
         <Route path="/blogs/:id" element={<BlogDetailPage />} />
       </Routes>

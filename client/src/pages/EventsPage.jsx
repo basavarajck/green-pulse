@@ -1,4 +1,4 @@
-// src/pages/EventsPage.jsx
+// src/pages/EventsPage.jsx - COMPLETE with Upcoming Filter
 import React, { useState, useEffect } from 'react';
 import { ChevronLeft, Calendar, MapPin } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
@@ -14,9 +14,14 @@ const EventsPage = () => {
   const [formLoading, setFormLoading] = useState(false);
   const [editingEvent, setEditingEvent] = useState(null);
   const [error, setError] = useState('');
+  const [showUpcomingOnly, setShowUpcomingOnly] = useState(true); // 👈 NEW: Filter state
 
-  // Fetch events on mount
+  // Fetch events on mount + check URL params
   useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const upcomingOnly = urlParams.get('upcoming') === 'true';
+    setShowUpcomingOnly(upcomingOnly);
+    
     fetchEvents();
   }, []);
 
@@ -38,6 +43,26 @@ const EventsPage = () => {
       setLoading(false);
     }
   };
+
+  // 👈 NEW: Filter toggle with URL update
+  const toggleFilter = () => {
+    const newFilter = !showUpcomingOnly;
+    setShowUpcomingOnly(newFilter);
+    
+    // Update URL without reload
+    const url = new URL(window.location);
+    if (newFilter) {
+      url.searchParams.set('upcoming', 'true');
+    } else {
+      url.searchParams.delete('upcoming');
+    }
+    window.history.replaceState({}, '', url);
+  };
+
+  // 👈 NEW: Filtered events
+  const filteredEvents = showUpcomingOnly 
+    ? events.filter(event => event.isUpcoming === true)
+    : events;
 
   const handleCreate = async (eventData) => {
     try {
@@ -121,6 +146,22 @@ const EventsPage = () => {
           </div>
         </div>
 
+        {/* 👈 NEW: Upcoming Filter Toggle */}
+        <div className="mb-8 flex justify-center">
+          <button
+            onClick={toggleFilter}
+            className={`group flex items-center gap-3 rounded-xl px-6 py-3 text-sm font-semibold shadow-lg shadow-green-900/30 transition-all duration-300 border-2 ${
+              showUpcomingOnly
+                ? 'bg-gradient-to-r from-green-600 to-emerald-600 text-white border-green-500 shadow-green-500/50 hover:shadow-green-400/70 hover:scale-[1.02] hover:from-green-500 hover:to-emerald-500'
+                : 'bg-gray-900/50 text-gray-300 border-gray-700/50 hover:bg-gray-800/70 hover:text-white hover:border-green-500/50 hover:shadow-green-400/30'
+            }`}
+          >
+            <Calendar className="w-4 h-4 group-hover:scale-110 transition-transform" />
+            <span>{showUpcomingOnly ? 'Upcoming Events Only' : 'Show All Events'}</span>
+            <div className={`w-2 h-2 rounded-full transition-all ${showUpcomingOnly ? 'bg-white scale-110' : 'bg-green-400'}`}></div>
+          </button>
+        </div>
+
         {/* Error */}
         {error && (
           <div className="mb-8 p-4 rounded-xl bg-red-900/30 border border-red-800/50 text-red-200 text-sm">
@@ -139,12 +180,17 @@ const EventsPage = () => {
         )}
 
         {/* Events Grid */}
-        {events.length === 0 ? (
+        {filteredEvents.length === 0 ? (
           <div className="text-center py-20">
             <Calendar className="w-20 h-20 text-gray-600 mx-auto mb-6 opacity-50" />
-            <h3 className="text-2xl font-bold text-gray-400 mb-2">No Events Yet</h3>
+            <h3 className="text-2xl font-bold text-gray-400 mb-2">
+              {showUpcomingOnly ? 'No Upcoming Events' : 'No Events Yet'}
+            </h3>
             <p className="text-gray-500 mb-8 max-w-md mx-auto">
-              Check back soon for upcoming workshops, drives, and sustainability events.
+              {showUpcomingOnly 
+                ? 'Check back soon for our next workshops and sustainability drives!' 
+                : 'No events scheduled yet. Stay tuned!'
+              }
             </p>
             {isLoggedIn() && isAdmin() && (
               <p className="text-green-400">
@@ -154,7 +200,7 @@ const EventsPage = () => {
           </div>
         ) : (
           <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {events.map((event) => (
+            {filteredEvents.map((event) => (
               <EventCard
                 key={event._id}
                 event={event}

@@ -1,15 +1,37 @@
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Mail, Lock, Github } from 'lucide-react';
 
 const Login = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [error, setError] = useState('');
+  const location = useLocation();
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
+  
+  const handleLoginSuccess = () => {
+  const urlParams = new URLSearchParams(location.search);
+  const redirect = urlParams.get('redirect') || '/';
+  navigate(redirect);
+  };
+
+  useEffect(() => {
+    const urlParams = new URLSearchParams(location.search);
+    const token = urlParams.get('token');
+    const errorMsg = urlParams.get('error');
+    
+    if (token) {
+      localStorage.setItem('token', token);
+      // Clear URL params after saving token
+      window.history.replaceState({}, document.title, '/login');
+      handleLoginSuccess();
+    } else if (errorMsg) {
+      setError(decodeURIComponent(errorMsg));
+    }
+  }, [location.search]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -23,7 +45,7 @@ const Login = () => {
       if (!res.ok) throw new Error(data.message);
 
       localStorage.setItem('token', data.token);
-      navigate('/'); 
+      handleLoginSuccess(); 
     } catch (err) {
       setError(err.message);
     }

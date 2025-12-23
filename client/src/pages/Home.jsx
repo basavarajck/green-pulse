@@ -4,10 +4,11 @@ import Hero from '../components/Hero.jsx'
 import VisionSection from '../components/VisionSection.jsx'
 import LeadsSection from '../components/LeadsSection.jsx'
 import Footer from '../components/Footer.jsx'
-
+import FallingLeaves from '../components/FallingLeaves.jsx'
 const Home = () => {
   return (
     <div className="min-h-screen w-full bg-neutral-50 text-neutral-900">
+       <FallingLeaves />
       {/* Section 1: Navbar + Hero */}
       <section
         id="home"
