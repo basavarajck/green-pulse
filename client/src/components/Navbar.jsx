@@ -1,3 +1,4 @@
+// src/components/Navbar.jsx - FIXED Events navigation
 import React, { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { User, LogOut } from 'lucide-react'
@@ -9,11 +10,11 @@ const scrollToId = (id) => {
 }
 
 const links = [
-  { id: 'home', label: 'Home' },
-  { id: 'events', label: 'Events' },
-  { id: 'announcements', label: 'Announcements' },
-  { id: 'blogs', label: 'Blogs' },
-  { id: 'projects', label: 'Projects' },
+  { id: 'home', label: 'Home', isRoute: false },
+  { id: 'events', label: 'Events', path: '/events' },
+  { id: 'announcements', label: 'Announcements', path: '/announcements' },
+  { id: 'blogs', label: 'Blogs', path: '/blogs' },
+  { id: 'projects', label: 'Projects', path: '/projects' },
 ]
 
 const Navbar = () => {
@@ -21,7 +22,6 @@ const Navbar = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false)
   const navigate = useNavigate()
 
-  // Check login status on mount
   useEffect(() => {
     const token = localStorage.getItem('token')
     setIsLoggedIn(!!token)
@@ -31,11 +31,18 @@ const Navbar = () => {
     localStorage.removeItem('token')
     setIsLoggedIn(false)
     navigate('/')
-    window.location.reload() // Reload to ensure state is clear
+    window.location.reload()
   }
 
-  const handleClick = (id) => {
-    scrollToId(id)
+  // 👈 NEW: Smart link handler
+  const handleLinkClick = (link) => {
+    if (link.path) {
+      // Route-based navigation (Events)
+      navigate(link.path)
+    } else {
+      // Scroll-based navigation
+      scrollToId(link.id)
+    }
     setOpen(false)
   }
 
@@ -60,7 +67,7 @@ const Navbar = () => {
             <button
               key={link.id}
               className="text-green-100 underline-offset-4 hover:text-green-300 hover:underline transition-all"
-              onClick={() => handleClick(link.id)}
+              onClick={() => handleLinkClick(link)}
             >
               {link.label}
             </button>
@@ -113,7 +120,7 @@ const Navbar = () => {
               <button
                 key={link.id}
                 className="w-full rounded-md px-2 py-2 text-left text-sm text-green-100 hover:bg-green-900/50 transition-colors"
-                onClick={() => handleClick(link.id)}
+                onClick={() => handleLinkClick(link)}
               >
                 {link.label}
               </button>
@@ -143,4 +150,4 @@ const Navbar = () => {
   )
 }
 
-export default Navbar
+export default Navbar;
