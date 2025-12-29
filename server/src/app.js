@@ -40,7 +40,9 @@ app.get("/", (req, res) => {
 async function start() {
   try {
     await mongoose.connect(process.env.MONGO_URI);
+
     console.log("✅ Connected to MongoDB Atlas");
+    
 
     const port = process.env.PORT || 4000;
     app.listen(port, () => {
@@ -48,6 +50,7 @@ async function start() {
     });
   } catch (err) {
     console.error("❌ Database connection error:", err);
+    console.log("MONGO_URI =", process.env.MONGO_URI);
   }
 }
 

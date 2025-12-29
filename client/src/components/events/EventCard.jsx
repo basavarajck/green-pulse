@@ -6,11 +6,21 @@ import { isAdmin } from '../../utils/auth';
 const EventCard = ({ event, onDelete, onEdit }) => {
   const { _id, title, description, date, image, link, isUpcoming } = event;
   const [imageError, setImageError] = useState(false);
-
+  
+  // 👇 ADD THIS HELPER FUNCTION
+  const formatExternalLink = (url) => {
+    if (!url) return '#';
+    // If URL already has protocol, return as-is
+    if (url.startsWith('http://') || url.startsWith('https://')) {
+      return url;
+    }
+    // Otherwise, add https://
+    return `https://${url}`;
+  };
 
   const handleImageError = () => {
     setImageError(true);
-    console.log('Image failed to load:', image); // 👈 Debug
+    console.log('Image failed to load:', image);
   };
 
   const getImageUrl = (url) => {
@@ -78,16 +88,17 @@ const EventCard = ({ event, onDelete, onEdit }) => {
 
       {/* Link Button */}
       {link && (
-      <a
-        href={link}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="inline-flex items-center gap-2 mb-4 px-4 py-2 rounded-lg bg-green-900/50 border border-green-700/50 text-green-200 text-sm font-medium hover:bg-green-800/70 hover:border-green-500/70 transition-all duration-200"
-      >
-        Register Now
-        <ExternalLink className="w-4 h-4" />
-      </a>
-    )}
+        <a
+          href={formatExternalLink(link)}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-2 mb-4 px-4 py-2 rounded-lg bg-green-900/50 border border-green-700/50 text-green-200 text-sm font-medium hover:bg-green-800/70 hover:border-green-500/70 transition-all duration-200"
+        >
+          Register Now
+          <ExternalLink className="w-4 h-4" />
+        </a>
+      )}
+
 
       {/* Admin Controls */}
       {isAdmin() && (
