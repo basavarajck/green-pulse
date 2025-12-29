@@ -1,6 +1,7 @@
-// VisionSection.jsx - FIXED text visibility
+// VisionSection.jsx - WITH NAVIGATION
 import React from 'react'
-import { Leaf, Microscope } from 'lucide-react'
+import { Leaf, Microscope, ArrowRight } from 'lucide-react'
+import { Link } from 'react-router-dom'
 
 const items = [
   {
@@ -14,14 +15,14 @@ const items = [
 ]
 
 const researchDomains = [
-  'Carbon Footprint',
-  'Renewable Energy', 
-  'Soil Conservation',
-  'Biodiversity & Ecosystem',
-  'Waste Management',
-  'Water Pollution',
-  'Air Pollution',
-  'Urban Heat Island Effect'
+  { id: 'carbon-footprint', name: 'Carbon Footprint' },
+  { id: 'renewable-energy', name: 'Renewable Energy' },
+  { id: 'soil-conservation', name: 'Soil Conservation' },
+  { id: 'biodiversity', name: 'Biodiversity & Ecosystem' },
+  { id: 'waste-management', name: 'Waste Management' },
+  { id: 'water-pollution', name: 'Water Pollution' },
+  { id: 'air-pollution', name: 'Air Pollution' },
+  { id: 'urban-heat', name: 'Urban Heat Island Effect' }
 ]
 
 const VisionSection = () => {
@@ -60,16 +61,18 @@ const VisionSection = () => {
           </h3>
         </div>
         
-        {/* Responsive horizontal scroll */}
+        {/* 👇 UPDATED: Clickable domain buttons with navigation */}
         <div className="overflow-x-auto pb-4 -mx-4 sm:-mx-6">
           <div className="flex gap-2 sm:gap-3 px-4 sm:px-6 flex-nowrap">
             {researchDomains.map((domain, idx) => (
-              <div
+              <Link
                 key={idx}
-                className="px-4 py-2 sm:px-6 sm:py-3 whitespace-nowrap rounded-xl bg-gradient-to-r from-green-500/90 to-emerald-600/90 backdrop-blur-sm border border-green-400/50 shadow-lg hover:shadow-xl hover:scale-[1.05] hover:border-green-500/70 transition-all duration-300 text-sm sm:text-base font-semibold text-white drop-shadow-lg"
+                to={`/research?domain=${domain.id}`}
+                className="group/domain px-4 py-2 sm:px-6 sm:py-3 whitespace-nowrap rounded-xl bg-gradient-to-r from-green-500/90 to-emerald-600/90 backdrop-blur-sm border border-green-400/50 shadow-lg hover:shadow-xl hover:scale-[1.05] hover:border-green-500/70 hover:from-green-600 hover:to-emerald-700 transition-all duration-300 text-sm sm:text-base font-semibold text-white drop-shadow-lg flex items-center gap-2"
               >
-                {domain}
-              </div>
+                {domain.name}
+                <ArrowRight className="w-4 h-4 opacity-0 -translate-x-2 group-hover/domain:opacity-100 group-hover/domain:translate-x-0 transition-all duration-300" />
+              </Link>
             ))}
           </div>
         </div>

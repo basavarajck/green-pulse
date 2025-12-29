@@ -13,6 +13,8 @@ import ProjectsPage from './pages/ProjectsPage';
 import BlogsPage from './pages/BlogsPage';  
 import BlogDetailPage from './pages/BlogDetailPage';
 import ProtectedRoute from './components/ProtectedRoute';
+import ResearchPage from './pages/ResearchPage';
+
 function App() {
   return (
     <BrowserRouter>
@@ -47,6 +49,7 @@ function App() {
         />
         <Route path="/blogs" element={<BlogsPage />} />  
         <Route path="/blogs/:id" element={<BlogDetailPage />} />
+        <Route path="/research" element={<ResearchPage />} />
       </Routes>
     </BrowserRouter>
   );

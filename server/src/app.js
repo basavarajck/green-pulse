@@ -16,6 +16,7 @@ require("./config/passport");
 app.use(passport.initialize());
 
 // Import routes
+const researchRoutes = require('./routes/researchRoutes');
 const homeRoutes = require("./routes/homeRoutes");
 const teamRoutes = require("./routes/teamRoutes");
 const eventRoutes = require("./routes/eventRoutes");
