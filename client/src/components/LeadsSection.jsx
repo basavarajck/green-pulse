@@ -1,35 +1,40 @@
 import React from 'react'
-
+import president from "../assets/leads photos/pawan.jpg"
+import vicepresident2 from "../assets/leads photos/admin.jpg"
+import vicepresident1 from "../assets/leads photos/vp.jpg"
+import techLead from "../assets/leads photos/Tech lead.jpg"
+import designLead from "../assets/leads photos/admin1.jpg"
+import eventsLead from "../assets/leads photos/events lead.jpg"
 const leads = [
   {
     name: 'Pawan Revankar',
     role: 'Club President',
-    photo: 'https://images.pexels.com/photos/2379004/pexels-photo-2379004.jpeg',
+    photo: president,
   },
   {
-    name: 'Priya Verma',
-    role: 'Tech Lead',
-    photo: 'https://images.pexels.com/photos/1181519/pexels-photo-1181519.jpeg',
+    name: 'Vaibhav N S',
+    role: 'Vice President',
+    photo: vicepresident1,
   },
   {
     name: 'Rahul Nair',
-    role: 'Events Lead',
-    photo: 'https://images.pexels.com/photos/2379005/pexels-photo-2379005.jpeg',
+    role: 'Vice President',
+    photo: vicepresident2,
   },
   {
     name: 'Aarav Sharma',
-    role: 'Club President',
-    photo: 'https://images.pexels.com/photos/2379004/pexels-photo-2379004.jpeg',
+    role: 'Technical Lead',
+    photo: techLead,
   },
   {
     name: 'Priya Verma',
-    role: 'Tech Lead',
-    photo: 'https://images.pexels.com/photos/1181519/pexels-photo-1181519.jpeg',
+    role: 'Events Lead',
+    photo: eventsLead,
   },
   {
     name: 'Rahul Nair',
-    role: 'Events Lead',
-    photo: 'https://images.pexels.com/photos/2379005/pexels-photo-2379005.jpeg',
+    role: 'Design and Media Lead',
+    photo: designLead,
   },
 ]
 

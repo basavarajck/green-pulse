@@ -10,7 +10,7 @@ const Footer = () => {
         </div>
 
         <div className="flex items-center gap-4 text-xl text-neutral-200">
-          <a href="#" aria-label="Instagram" className="hover:text-green-400">
+          <a href="https://www.instagram.com/greenpulse_sjce/" aria-label="Instagram" className="hover:text-green-400">
             <FaInstagram />
           </a>
           <a href="#" aria-label="LinkedIn" className="hover:text-green-400">
