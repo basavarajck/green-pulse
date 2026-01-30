@@ -1,39 +1,45 @@
 import React from 'react'
 import president from "../assets/leads photos/pawan.jpg"
-import vicepresident2 from "../assets/leads photos/admin.jpg"
-import vicepresident1 from "../assets/leads photos/vp.jpg"
+import generalSecretary from "../assets/leads photos/admin.jpg"
+import vicePresident from "../assets/leads photos/vp.jpg"
 import techLead from "../assets/leads photos/Tech lead.jpg"
-import designLead from "../assets/leads photos/admin1.jpg"
+import tresurer from "../assets/leads photos/admin1.jpg"
 import eventsLead from "../assets/leads photos/events lead.jpg"
+import designLead from "../assets/leads photos/design lead.webp"
 const leads = [
   {
     name: 'Pawan Revankar',
-    role: 'Club President',
+    role: 'Founder and Chairperson',
     photo: president,
   },
   {
     name: 'Vaibhav N S',
     role: 'Vice President',
-    photo: vicepresident1,
+    photo: vicePresident,
   },
   {
-    name: 'Rahul Nair',
-    role: 'Vice President',
-    photo: vicepresident2,
+    name: 'Aniruddha S',
+    role: 'General Secretary',
+    photo: generalSecretary,
   },
   {
-    name: 'Aarav Sharma',
-    role: 'Technical Lead',
-    photo: techLead,
+    name: 'Prateek N Vasista',
+    role: 'Tresurer',
+    photo: tresurer,
   },
   {
-    name: 'Priya Verma',
+    name: 'Manya V',
     role: 'Events Lead',
     photo: eventsLead,
   },
   {
-    name: 'Rahul Nair',
-    role: 'Design and Media Lead',
+    name: 'H Vinayak Kamath',
+    role: 'Technical Lead',
+    photo: techLead,
+  },
+  {
+    name: 'Pranav G N',
+    role: 'Design Lead',
     photo: designLead,
   },
 ]
