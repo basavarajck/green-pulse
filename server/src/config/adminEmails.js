@@ -7,5 +7,6 @@ module.exports = [
   "prateek.n.vasista@gmail.com",
   "pranavgn2005@gmail.com",
   "thrupthishetty2005@gmail.com",
-  "vinayakkamath17@gmail.com"
+  "vinayakkamath17@gmail.com",
+  "basavarajck2005@gmail.com"
 ];
