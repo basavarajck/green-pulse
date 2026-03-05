@@ -106,34 +106,46 @@ const projectRoutes = require("./routes/projectRoutes");
 const authRoutes = require("./routes/authRoutes");
 const blogRoutes = require("./routes/blogRoutes");
 
-// Register routes
+// MongoDB connection with caching for serverless
+let isConnected = false;
+
+async function connectDB() {
+  if (isConnected) return;
+  try {
+    await mongoose.connect(process.env.MONGO_URI);
+    isConnected = true;
+    console.log("✅ Connected to MongoDB Atlas");
+  } catch (err) {
+    console.error("❌ Database connection error:", err);
+    throw err;
+  }
+}
+
+// Ensure DB is connected before handling any request
+app.use(async (req, res, next) => {
+  try {
+    await connectDB();
+    next();
+  } catch (err) {
+    res.status(500).json({ message: "Database connection failed" });
+  }
+});
+
+// Register routes (placed after DB middleware so connection is ready)
 app.use("/home", homeRoutes);
-app.use("/team", teamRoutes);               // existing (unchanged)
-app.use("/members", teamMembersRoutes);     // 👈 NEW
+app.use("/team", teamRoutes);
+app.use("/members", teamMembersRoutes);
 app.use("/events", eventRoutes);
 app.use("/announcements", announcementRoutes);
 app.use("/projects", projectRoutes);
 app.use("/auth", authRoutes);
 app.use("/blogs", blogRoutes);
+app.use("/api/research", researchRoutes);
 
 // Test route
 app.get("/", (req, res) => {
   res.send("Club Backend API is running...");
 });
-
-// Connect to MongoDB
-async function connectDB() {
-  try {
-    await mongoose.connect(process.env.MONGO_URI);
-    console.log("✅ Connected to MongoDB Atlas");
-  } catch (err) {
-    console.error("❌ Database connection error:", err);
-    console.log("MONGO_URI =", process.env.MONGO_URI);
-  }
-}
-
-// Connect to DB on startup
-connectDB();
 
 // Only listen when running locally (not on Vercel)
 if (!process.env.VERCEL) {
