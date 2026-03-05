@@ -78,12 +78,26 @@ const app = express();
 
 // Middlewares
 app.use(cors({
-  origin: [
-    "https://green-pulse-ten.vercel.app",
-    "https://greenpulsejssstu.vercel.app",
-    "http://localhost:5173",
-    "http://localhost:5174"
-  ],
+  origin: function (origin, callback) {
+    const allowedOrigins = [
+      "https://green-pulse-ten.vercel.app",
+      "https://greenpulsejssstu.vercel.app",
+      "http://localhost:5173",
+      "http://localhost:5174"
+    ];
+    // Allow requests with no origin (e.g. server-to-server, Postman)
+    // Allow exact matches, and any Vercel preview deployment for the project
+    if (
+      !origin ||
+      allowedOrigins.includes(origin) ||
+      /^https:\/\/greenpulsejssstu.*\.vercel\.app$/.test(origin) ||
+      /^https:\/\/green-pulse.*\.vercel\.app$/.test(origin)
+    ) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
   credentials: true
 }));
 app.use(express.json());
