@@ -77,7 +77,14 @@ const path = require("path"); // 👈 NEW
 const app = express();
 
 // Middlewares
-app.use(cors());
+app.use(cors({
+  origin: [
+    "https://green-pulse-ten.vercel.app",
+    "http://localhost:5173",
+    "http://localhost:5174"
+  ],
+  credentials: true
+}));
 app.use(express.json());
 
 // Serve uploaded files as static assets 👈 NEW

@@ -51,7 +51,7 @@ passport.use(
     {
       clientID: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-      callbackURL: "/auth/google/callback",
+      callbackURL: "https://green-pulse-ten.vercel.app/auth/google/callback",
     },
     handleSocialAuth
   )
@@ -63,7 +63,7 @@ passport.use(
     {
       clientID: process.env.GITHUB_CLIENT_ID,
       clientSecret: process.env.GITHUB_CLIENT_SECRET,
-      callbackURL: "/auth/github/callback",
+      callbackURL: "https://green-pulse-ten.vercel.app/auth/github/callback",
       scope: ["user:email"], // Important for GitHub to get email
     },
     handleSocialAuth
