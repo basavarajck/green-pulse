@@ -1,5 +1,5 @@
 // src/api/teamApi.js
-const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000';
+const BASE_URL = import.meta.env.VITE_API_URL;
 
 const getAuthHeaders = () => ({
   Authorization: localStorage.getItem('token'),

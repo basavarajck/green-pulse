@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Mail, Lock, Github } from 'lucide-react';
 
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:4000';
+const API_BASE = import.meta.env.VITE_API_URL;
 
 const Login = () => {
   const navigate = useNavigate();

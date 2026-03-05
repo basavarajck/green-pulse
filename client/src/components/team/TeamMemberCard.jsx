@@ -3,7 +3,7 @@ import React from 'react';
 import { Mail, Pencil, Trash2, Shield } from 'lucide-react';
 import { isAdmin } from '../../utils/auth';
 
-const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000';
+const BASE_URL = import.meta.env.VITE_API_URL;
 
 const TeamMemberCard = ({ member, onEdit, onDelete }) => {
   const imageUrl = member.image

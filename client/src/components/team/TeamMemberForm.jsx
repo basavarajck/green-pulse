@@ -24,7 +24,7 @@ const TeamMemberForm = ({ onSubmit, onCancel, initialData, loading }) => {
         designation: initialData.designation || '',
       });
       if (initialData.image) {
-        const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000';
+        const BASE_URL = import.meta.env.VITE_API_URL;
         setImagePreview(
           initialData.image.startsWith('http')
             ? initialData.image

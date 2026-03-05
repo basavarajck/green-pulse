@@ -1,7 +1,7 @@
 // src/api/eventsApi.js - FIXED Authorization header
 import { getToken } from '../utils/auth.js';
 
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:4000';
+const API_BASE = import.meta.env.VITE_API_URL;
 
 export const getEvents = async () => {
   const res = await fetch(`${API_BASE}/events`);
