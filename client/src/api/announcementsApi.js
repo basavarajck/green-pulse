@@ -1,7 +1,7 @@
 // src/api/announcementsApi.js
 import { getToken } from '../utils/auth.js';
 
-const API_BASE = 'http://localhost:4000';
+const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:4000';
 
 export const getAnnouncements = async () => {
   const res = await fetch(`${API_BASE}/announcements`);

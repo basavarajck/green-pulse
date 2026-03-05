@@ -114,20 +114,27 @@ app.get("/", (req, res) => {
   res.send("Club Backend API is running...");
 });
 
-// Connect to MongoDB and start server
-async function start() {
+// Connect to MongoDB
+async function connectDB() {
   try {
     await mongoose.connect(process.env.MONGO_URI);
     console.log("✅ Connected to MongoDB Atlas");
-
-    const port = process.env.PORT || 4000;
-    app.listen(port, () => {
-      console.log(`🚀 Server running on port ${port}`);
-    });
   } catch (err) {
     console.error("❌ Database connection error:", err);
     console.log("MONGO_URI =", process.env.MONGO_URI);
   }
 }
 
-start();
+// Connect to DB on startup
+connectDB();
+
+// Only listen when running locally (not on Vercel)
+if (!process.env.VERCEL) {
+  const port = process.env.PORT || 4000;
+  app.listen(port, () => {
+    console.log(`🚀 Server running on port ${port}`);
+  });
+}
+
+// Export for Vercel serverless
+module.exports = app;
