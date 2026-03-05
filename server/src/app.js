@@ -80,6 +80,7 @@ const app = express();
 app.use(cors({
   origin: [
     "https://green-pulse-ten.vercel.app",
+    "https://greenpulsejssstu.vercel.app",
     "http://localhost:5173",
     "http://localhost:5174"
   ],
