@@ -1,14 +1,18 @@
 // server/src/controllers/teamMembersController.js
 const TeamMember = require("../models/TeamMember");
+const logger = require("../config/logger");
 const fs = require("fs");
 const path = require("path");
 
 // GET /members - public
 exports.getAllMembers = async (req, res) => {
   try {
-    const members = await TeamMember.find().sort({ createdAt: 1 });
+    const members = await TeamMember.find()
+      .sort({ createdAt: 1 })
+      .lean();
     res.json(members);
   } catch (err) {
+    logger.error("Error fetching team members:", err);
     res.status(500).json({ message: "Error fetching team members" });
   }
 };
@@ -30,8 +34,10 @@ exports.addMember = async (req, res) => {
     const member = new TeamMember({ name, role, email, designation, image: imagePath });
     await member.save();
 
+    logger.info(`Team member added: ${member._id} by ${req.user.id}`);
     res.status(201).json({ message: "Team member added", member });
   } catch (err) {
+    logger.error("Error adding team member:", err);
     res.status(500).json({ message: "Error adding team member" });
   }
 };
@@ -61,8 +67,10 @@ exports.updateMember = async (req, res) => {
 
     await existing.save();
 
+    logger.info(`Team member updated: ${id} by ${req.user.id}`);
     res.json({ message: "Team member updated", member: existing });
   } catch (err) {
+    logger.error("Error updating team member:", err);
     res.status(500).json({ message: "Error updating team member" });
   }
 };
@@ -83,8 +91,10 @@ exports.deleteMember = async (req, res) => {
 
     await TeamMember.findByIdAndDelete(id);
 
+    logger.info(`Team member deleted: ${id} by ${req.user.id}`);
     res.json({ message: "Team member deleted" });
   } catch (err) {
+    logger.error("Error deleting team member:", err);
     res.status(500).json({ message: "Error deleting team member" });
   }
 };

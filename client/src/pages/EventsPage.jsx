@@ -200,7 +200,7 @@ const EventsPage = () => {
           </div>
         ) : (
           <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {filteredEvents.map((event) => (
+            {filteredEvents?.map((event) => (
               <EventCard
                 key={event._id}
                 event={event}

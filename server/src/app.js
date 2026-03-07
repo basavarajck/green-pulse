@@ -1,80 +1,32 @@
-// require("dotenv").config();
-// const express = require("express");
-// const mongoose = require("mongoose");
-// const cors = require("cors");
-// const passport = require("passport");
-
-// // Initialize app
-// const app = express();
-
-// // Middlewares
-// app.use(cors());
-// app.use(express.json());
-
-// // Initialize Passport (Important: Place before routes)
-// require("./config/passport");
-// app.use(passport.initialize());
-
-// // Import routes
-// const researchRoutes = require('./routes/researchRoutes');
-// const homeRoutes = require("./routes/homeRoutes");
-// const teamRoutes = require("./routes/teamRoutes");
-// const eventRoutes = require("./routes/eventRoutes");
-// const announcementRoutes = require("./routes/announcementRoutes");
-// const projectRoutes = require("./routes/projectRoutes");
-// const authRoutes = require("./routes/authRoutes");
-// const blogRoutes = require("./routes/blogRoutes");
-// // Register routes
-// app.use("/home", homeRoutes);
-// app.use("/team", teamRoutes);
-// app.use("/events", eventRoutes);
-// app.use("/announcements", announcementRoutes);
-// app.use("/projects", projectRoutes);
-// app.use("/auth", authRoutes);
-// app.use("/blogs", blogRoutes);
-// // Test route
-// app.get("/", (req, res) => {
-//   res.send("Club Backend API is running...");
-// });
-
-// // Connect to MongoDB and start server
-// async function start() {
-//   try {
-//     await mongoose.connect(process.env.MONGO_URI);
-
-//     console.log("✅ Connected to MongoDB Atlas");
-    
-
-//     const port = process.env.PORT || 4000;
-//     app.listen(port, () => {
-//       console.log(`🚀 Server running on port ${port}`);
-//     });
-//   } catch (err) {
-//     console.error("❌ Database connection error:", err);
-//     console.log("MONGO_URI =", process.env.MONGO_URI);
-//   }
-// }
-
-// start();
-// server/src/app.js
-// CHANGES:
-//   1. Added: const path = require("path")
-//   2. Added: app.use("/uploads", express.static(...)) — serves uploaded images
-//   3. Added: const teamMembersRoutes = require('./routes/teamMembersRoutes')
-//   4. Added: app.use("/members", teamMembersRoutes)
-//
-// Everything else is UNCHANGED from your original app.js
-// ─────────────────────────────────────────────────────────────────────────────
-
 require("dotenv").config();
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
 const passport = require("passport");
-const path = require("path"); // 👈 NEW
+const path = require("path");
+const rateLimit = require("express-rate-limit");
+const helmet = require("helmet"); // Security headers
+const compression = require("compression"); // Response compression
+const morgan = require("morgan"); // HTTP request logger
+const logger = require("./config/logger"); // Winston logger
 
 // Initialize app
 const app = express();
+
+// Trust proxy - important for rate limiting behind reverse proxies
+app.set('trust proxy', 1);
+
+// Security headers
+app.use(helmet({
+  crossOriginResourcePolicy: { policy: "cross-origin" }, // Allow images from different origins
+  contentSecurityPolicy: false // Disable CSP for now (can configure later)
+}));
+
+// Response compression
+app.use(compression());
+
+// HTTP request logging with Morgan + Winston
+app.use(morgan('combined', { stream: logger.stream }));
 
 // Middlewares
 app.use(cors({
@@ -110,6 +62,26 @@ app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
 require("./config/passport");
 app.use(passport.initialize());
 
+// Rate limiting middleware 👈 NEW
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // Limit each IP to 100 requests per windowMs
+  message: { message: "Too many requests from this IP, please try again later." },
+  standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
+  legacyHeaders: false, // Disable the `X-RateLimit-*` headers
+});
+
+// Apply rate limiting to all routes
+app.use(limiter);
+
+// Stricter rate limit for auth routes 👈 NEW
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 5, // Limit each IP to 5 auth attempts per windowMs
+  message: { message: "Too many login attempts, please try again later." },
+  skipSuccessfulRequests: true, // Don't count successful requests
+});
+
 // Import routes
 const researchRoutes = require('./routes/researchRoutes');
 const homeRoutes = require("./routes/homeRoutes");
@@ -121,17 +93,44 @@ const projectRoutes = require("./routes/projectRoutes");
 const authRoutes = require("./routes/authRoutes");
 const blogRoutes = require("./routes/blogRoutes");
 
-// MongoDB connection with caching for serverless
+// MongoDB connection with caching for serverless and production optimizations
 let isConnected = false;
 
 async function connectDB() {
   if (isConnected) return;
+  
   try {
-    await mongoose.connect(process.env.MONGO_URI);
+    const options = {
+      maxPoolSize: 10, // Connection pool size for production
+      minPoolSize: 2,
+      maxIdleTimeMS: 30000,
+      serverSelectionTimeoutMS: 5000,
+      socketTimeoutMS: 45000,
+      family: 4, // Use IPv4, skip trying IPv6
+    };
+    
+    await mongoose.connect(process.env.MONGO_URI, options);
     isConnected = true;
-    console.log("✅ Connected to MongoDB Atlas");
+    logger.info("✅ Connected to MongoDB Atlas with connection pool");
+    
+    // Log connection events
+    mongoose.connection.on('error', (err) => {
+      logger.error('MongoDB connection error:', err);
+    });
+    
+    mongoose.connection.on('disconnected', () => {
+      logger.warn('MongoDB disconnected. Attempting to reconnect...');
+      isConnected = false;
+    });
+    
+    mongoose.connection.on('reconnected', () => {
+      logger.info('MongoDB reconnected');
+      isConnected = true;
+    });
+    
   } catch (err) {
-    console.error("❌ Database connection error:", err);
+    logger.error("❌ Database connection error:", err);
+    isConnected = false;
     throw err;
   }
 }
@@ -153,20 +152,132 @@ app.use("/members", teamMembersRoutes);
 app.use("/events", eventRoutes);
 app.use("/announcements", announcementRoutes);
 app.use("/projects", projectRoutes);
-app.use("/auth", authRoutes);
+app.use("/auth", authLimiter, authRoutes);
 app.use("/blogs", blogRoutes);
 app.use("/api/research", researchRoutes);
 
-// Test route
+// Health check endpoint
+app.get("/health", async (req, res) => {
+  const healthCheck = {
+    uptime: process.uptime(),
+    message: "OK",
+    timestamp: Date.now(),
+    mongoStatus: mongoose.connection.readyState === 1 ? "connected" : "disconnected",
+    environment: process.env.NODE_ENV || "development",
+    memory: process.memoryUsage()
+  };
+  
+  try {
+    // Ping database
+    await mongoose.connection.db.admin().ping();
+    res.status(200).json(healthCheck);
+  } catch (error) {
+    healthCheck.message = "Database connection failed";
+    healthCheck.error = error.message;
+    logger.error("Health check failed:", error);
+    res.status(503).json(healthCheck);
+  }
+});
+
+// API info route
 app.get("/", (req, res) => {
-  res.send("Club Backend API is running...");
+  res.json({
+    message: "Green Pulse API",
+    version: "1.0.0",
+    status: "running",
+    endpoints: {
+      health: "/health",
+      auth: "/auth",
+      blogs: "/blogs",
+      events: "/events",
+      projects: "/projects",
+      announcements: "/announcements",
+      team: "/team",
+      members: "/members",
+      research: "/api/research"
+    }
+  });
+});
+
+// 404 handler
+app.use((req, res) => {
+  logger.warn(`404 - Route not found: ${req.method} ${req.originalUrl}`);
+  res.status(404).json({
+    message: "Route not found",
+    path: req.originalUrl,
+    method: req.method
+  });
+});
+
+// Global error handler
+app.use((err, req, res, next) => {
+  logger.error('Error:', {
+    message: err.message,
+    stack: err.stack,
+    url: req.originalUrl,
+    method: req.method,
+    ip: req.ip
+  });
+  
+  // Don't leak error details in production
+  const errorResponse = {
+    message: process.env.NODE_ENV === 'production' 
+      ? 'Internal server error' 
+      : err.message,
+    ...(process.env.NODE_ENV !== 'production' && { stack: err.stack })
+  };
+  
+  res.status(err.status || 500).json(errorResponse);
 });
 
 // Only listen when running locally (not on Vercel)
 if (!process.env.VERCEL) {
   const port = process.env.PORT || 4000;
-  app.listen(port, () => {
-    console.log(`🚀 Server running on port ${port}`);
+  const server = app.listen(port, () => {
+    logger.info(`🚀 Server running on port ${port}`);
+    logger.info(`Environment: ${process.env.NODE_ENV || 'development'}`);
+    logger.info(`Health check: http://localhost:${port}/health`);
+  });
+  
+  // Graceful shutdown
+  const gracefulShutdown = async (signal) => {
+    logger.info(`\n${signal} signal received: closing HTTP server`);
+    
+    server.close(async () => {
+      logger.info('HTTP server closed');
+      
+      // Close database connection
+      try {
+        await mongoose.connection.close();
+        logger.info('MongoDB connection closed');
+        process.exit(0);
+      } catch (err) {
+        logger.error('Error during shutdown:', err);
+        process.exit(1);
+      }
+    });
+    
+    // Force close after 10 seconds
+    setTimeout(() => {
+      logger.error('Forcing shutdown after timeout');
+      process.exit(1);
+    }, 10000);
+  };
+  
+  // Handle shutdown signals
+  process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
+  process.on('SIGINT', () => gracefulShutdown('SIGINT'));
+  
+  // Handle uncaught exceptions
+  process.on('uncaughtException', (err) => {
+    logger.error('Uncaught Exception:', err);
+    gracefulShutdown('uncaughtException');
+  });
+  
+  // Handle unhandled promise rejections
+  process.on('unhandledRejection', (reason, promise) => {
+    logger.error('Unhandled Rejection at:', promise, 'reason:', reason);
+    gracefulShutdown('unhandledRejection');
   });
 }
 

@@ -45,6 +45,7 @@ const TeamMemberCard = ({ member, onEdit, onDelete }) => {
             <img
               src={imageUrl}
               alt={member.name}
+              loading="lazy"
               className="w-full h-full object-cover"
               onError={(e) => {
                 e.target.style.display = 'none';

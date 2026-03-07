@@ -1,6 +1,6 @@
 // src/components/events/EventCard.jsx
 import React, {useState} from 'react';
-import { ExternalLink, Trash2 } from 'lucide-react';
+import { ExternalLink, Trash2, Calendar } from 'lucide-react';
 import { isAdmin } from '../../utils/auth';
 
 const EventCard = ({ event, onDelete, onEdit }) => {
@@ -45,7 +45,7 @@ const EventCard = ({ event, onDelete, onEdit }) => {
       {image && !imageError ? (
         <div className="mb-3 relative group">
           <img
-            src={image}
+            src={getImageUrl(image)}
             alt={title}
             onError={handleImageError}
             loading="lazy"

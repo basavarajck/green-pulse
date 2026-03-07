@@ -24,6 +24,7 @@ const BlogCard = ({ blog, onDelete, onEdit }) => {
           <img
             src={coverImage}
             alt={title}
+            loading="lazy"
             className="h-full w-full object-cover group-hover:scale-110 transition-transform duration-700"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/60 to-transparent"></div>

@@ -40,10 +40,11 @@ const router = express.Router();
 const authController = require("../controllers/authController");
 const passport = require("passport");
 const jwt = require("jsonwebtoken");
+const { signupValidation, loginValidation } = require("../middleware/validators");
 
-// Email/Password login
-router.post("/signup", authController.signup);
-router.post("/login", authController.login);
+// Email/Password login with validation
+router.post("/signup", signupValidation, authController.signup);
+router.post("/login", loginValidation, authController.login);
 
 // Helper function to generate token and redirect
 const generateTokenAndRedirect = (req, res) => {

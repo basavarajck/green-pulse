@@ -171,7 +171,7 @@ const ProjectsPage = () => {
             </div>
           ) : (
             <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-              {projects.map((project) => (
+              {projects?.map((project) => (
                 <ProjectCard
                   key={project._id}
                   project={project}
