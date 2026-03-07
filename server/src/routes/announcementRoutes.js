@@ -15,7 +15,7 @@ router.get("/", getAnnouncements);
 
 // Admin-only with validation
 router.post("/", requireAuth, requireAdmin, announcementValidation, addAnnouncement);
-router.put("/", requireAuth, requireAdmin, announcementValidation, updateAnnouncement);
+router.put("/:id", requireAuth, requireAdmin, announcementValidation, updateAnnouncement);
 router.delete("/:id", requireAuth, requireAdmin, deleteAnnouncement);
 
 module.exports = router;

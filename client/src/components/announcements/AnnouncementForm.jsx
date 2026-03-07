@@ -40,7 +40,11 @@ const AnnouncementForm = ({ onSubmit, onCancel, initialData = {}, loading }) => 
       alert('All fields are required');
       return;
     }
-    onSubmit(formData);
+    // Include _id when editing
+    const submitData = initialData && initialData._id 
+      ? { ...formData, _id: initialData._id }
+      : formData;
+    onSubmit(submitData);
   };
 
   if (!isAdmin()) return null;

@@ -34,7 +34,7 @@ export const updateProject = async (projectData) => {
   const token = getToken();
   if (!token) throw new Error('Not authorized');
   
-  const res = await fetch(`${API_BASE}/projects`, {
+  const res = await fetch(`${API_BASE}/projects/${projectData._id}`, {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',

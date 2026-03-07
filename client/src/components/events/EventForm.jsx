@@ -51,7 +51,11 @@ const EventForm = ({ onSubmit, onCancel, initialData = {}, loading }) => {
       alert('Title, description, and date are required');
       return;
     }
-    onSubmit(formData);
+    // Include _id when editing
+    const submitData = initialData && initialData._id 
+      ? { ...formData, _id: initialData._id }
+      : formData;
+    onSubmit(submitData);
   };
 
   // FIXED: Early return if not admin

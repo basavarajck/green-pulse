@@ -152,6 +152,7 @@ const AnnouncementsPage = () => {
                 announcement={announcement}
                 onDelete={handleDelete}
                 onEdit={handleEdit}
+                isEditing={editingAnnouncement?._id === announcement._id}
               />
             ))}
           </div>

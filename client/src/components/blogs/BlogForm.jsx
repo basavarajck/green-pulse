@@ -61,7 +61,11 @@ const BlogForm = ({ onSubmit, onCancel, initialData = {}, loading }) => {
       alert('Title, author, content, and date are required');
       return;
     }
-    onSubmit(formData);
+    // Include _id when editing
+    const submitData = initialData && initialData._id 
+      ? { ...formData, _id: initialData._id }
+      : formData;
+    onSubmit(submitData);
   };
 
   if (!isAdmin()) return null;
@@ -127,16 +131,38 @@ const BlogForm = ({ onSubmit, onCancel, initialData = {}, loading }) => {
 
         {/* Cover Image */}
         <div>
-          <label className="block mb-2 text-sm font-semibold text-green-300">
-            Cover Image URL
+          <label className="block mb-2 text-sm font-semibold text-green-300 flex items-center gap-2">
+            <ImageIcon className="w-4 h-4" />
+            Cover Image URL (paste link)
           </label>
           <input
             name="coverImage"
             value={formData.coverImage}
             onChange={handleChange}
             className="w-full px-4 py-3 rounded-xl border border-green-800/50 bg-gray-900/50 text-white placeholder-gray-500 focus:border-green-500 focus:ring-2 focus:ring-green-500/50 transition-all"
-            placeholder="https://example.com/cover-image.jpg"
+            placeholder="https://images.unsplash.com/photo-123456..."
           />
+          <p className="mt-1 text-xs text-gray-400">
+            Paste any image URL from Unsplash, Imgur, or direct image links
+          </p>
+          
+          {/* Image Preview */}
+          {formData.coverImage && (
+            <div className="mt-3 rounded-lg overflow-hidden border border-green-800/30">
+              <img
+                src={formData.coverImage}
+                alt="Preview"
+                className="w-full h-48 object-cover"
+                onError={(e) => {
+                  e.target.style.display = 'none';
+                  e.target.nextSibling.style.display = 'flex';
+                }}
+              />
+              <div className="hidden items-center justify-center h-48 bg-gray-900/50 text-gray-400 text-sm">
+                Invalid image URL or image failed to load
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Content - Simple Text Area */}

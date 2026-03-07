@@ -31,7 +31,7 @@ exports.addAnnouncement = async (req, res) => {
 exports.updateAnnouncement = async (req, res) => {
   try {
     const updated = await Announcement.findByIdAndUpdate(
-      req.body._id,
+      req.params.id,
       req.body,
       { new: true, runValidators: true }
     );

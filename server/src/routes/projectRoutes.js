@@ -9,7 +9,7 @@ router.get("/", projectController.getProjects);
 
 // Admin-only with validation
 router.post("/", requireAuth, requireAdmin, projectValidation, projectController.addProject);
-router.put("/", requireAuth, requireAdmin, projectValidation, projectController.updateProject);
+router.put("/:id", requireAuth, requireAdmin, projectValidation, projectController.updateProject);
 router.delete("/:id", requireAuth, requireAdmin, projectController.deleteProject);
 
 module.exports = router;

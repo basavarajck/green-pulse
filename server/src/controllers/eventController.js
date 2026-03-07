@@ -30,7 +30,7 @@ exports.addEvent = async (req, res) => {
 // UPDATE event
 exports.updateEvent = async (req, res) => {
   try {
-    const updated = await Event.findByIdAndUpdate(req.body._id, req.body, {
+    const updated = await Event.findByIdAndUpdate(req.params.id, req.body, {
       new: true,
       runValidators: true
     });

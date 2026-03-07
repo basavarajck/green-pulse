@@ -3,8 +3,19 @@ import React from 'react';
 import { ExternalLink, Trash2, Edit, Calendar } from 'lucide-react';
 import { isAdmin } from '../../utils/auth';
 
-const ProjectCard = ({ project, onDelete, onEdit }) => {
+const ProjectCard = ({ project, onDelete, onEdit, isEditing }) => {
   const { _id, title, description, image, link, stack, date } = project;
+
+  // Helper function to ensure external links have protocol
+  const formatExternalLink = (url) => {
+    if (!url) return '#';
+    // If URL already has protocol, return as-is
+    if (url.startsWith('http://') || url.startsWith('https://')) {
+      return url;
+    }
+    // Otherwise, add https://
+    return `https://${url}`;
+  };
 
   return (
     <div className="group relative rounded-2xl border border-cyan-900/40 bg-gradient-to-br from-slate-900/90 via-slate-950/80 to-black/90 overflow-hidden shadow-2xl hover:shadow-cyan-500/30 transition-all duration-500 hover:scale-[1.02] hover:border-cyan-500/60">
@@ -69,7 +80,7 @@ const ProjectCard = ({ project, onDelete, onEdit }) => {
           {/* Link */}
           {link && (
             <a
-              href={link}
+              href={formatExternalLink(link)}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-cyan-600/20 to-blue-600/20 border border-cyan-600/50 text-cyan-300 text-sm font-medium hover:from-cyan-600/40 hover:to-blue-600/40 hover:border-cyan-400/70 transition-all duration-300 group/link"
@@ -93,7 +104,12 @@ const ProjectCard = ({ project, onDelete, onEdit }) => {
               )}
               <button
                 onClick={() => onDelete(_id)}
-                className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg bg-red-900/40 border border-red-700/50 text-red-200 text-xs font-medium hover:bg-red-800/60 transition-all"
+                disabled={isEditing}
+                className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium transition-all ${
+                  isEditing
+                    ? 'bg-gray-800/30 border border-gray-700/30 text-gray-500 cursor-not-allowed opacity-50'
+                    : 'bg-red-900/40 border border-red-700/50 text-red-200 hover:bg-red-800/60'
+                }`}
               >
                 <Trash2 className="w-3.5 h-3.5" />
                 Delete

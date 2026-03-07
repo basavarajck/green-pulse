@@ -22,7 +22,8 @@ const BlogsPage = () => {
     try {
       setLoading(true);
       const data = await getBlogs();
-      setBlogs(data);
+      // Backend returns { blogs, pagination }
+      setBlogs(data.blogs || data);
       setError('');
     } catch (err) {
       setError(err.message);
@@ -152,6 +153,7 @@ const BlogsPage = () => {
                 blog={blog}
                 onDelete={handleDelete}
                 onEdit={handleEdit}
+                isEditing={editingBlog?._id === blog._id}
               />
             ))}
           </div>

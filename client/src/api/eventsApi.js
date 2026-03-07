@@ -34,11 +34,11 @@ export const updateEvent = async (eventData) => {
   const token = getToken();
   if (!token) throw new Error('Not authorized');
   
-  const res = await fetch(`${API_BASE}/events`, {
+  const res = await fetch(`${API_BASE}/events/${eventData._id}`, {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
-      'Authorization': token  // 👈 FIXED: Just token
+      'Authorization': token
     },
     body: JSON.stringify(eventData)
   });

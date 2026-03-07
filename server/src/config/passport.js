@@ -7,7 +7,22 @@ const adminEmails = require("./adminEmails"); // Assuming you have this config
 const handleSocialAuth = async (accessToken, refreshToken, profile, done) => {
   try {
     let user;
-    const email = profile.emails[0].value;
+    
+    // Get email from profile - handle cases where email might not be available
+    let email = null;
+    if (profile.emails && profile.emails.length > 0) {
+      email = profile.emails[0].value;
+    }
+    
+    // For GitHub, if no email in profile.emails, check _json
+    if (!email && profile.provider === "github" && profile._json && profile._json.email) {
+      email = profile._json.email;
+    }
+    
+    // If still no email, return error - we require email for user accounts
+    if (!email) {
+      return done(new Error(`No email available from ${profile.provider}. Please ensure your email is public and verified on ${profile.provider}.`), null);
+    }
 
     // 1. Check if user exists by social ID
     if (profile.provider === "google") {
@@ -31,7 +46,7 @@ const handleSocialAuth = async (accessToken, refreshToken, profile, done) => {
     if (!user) {
       const role = adminEmails.includes(email) ? "admin" : "user";
       user = await User.create({
-        name: profile.displayName,
+        name: profile.displayName || profile.username || "User",
         email: email,
         googleId: profile.provider === "google" ? profile.id : undefined,
         githubId: profile.provider === "github" ? profile.id : undefined,
@@ -51,8 +66,7 @@ passport.use(
     {
       clientID: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-      // callbackURL: "https://green-pulse-ten.vercel.app/auth/google/callback",
-      callbackURL: "http://localhost:4000/auth/google/callback",
+      callbackURL: `${process.env.API_URL || "http://localhost:4000"}/auth/google/callback`,
     },
     handleSocialAuth
   )
@@ -64,8 +78,7 @@ passport.use(
     {
       clientID: process.env.GITHUB_CLIENT_ID,
       clientSecret: process.env.GITHUB_CLIENT_SECRET,
-      // callbackURL: "https://green-pulse-ten.vercel.app/auth/github/callback",
-      callbackURL: "http://localhost:4000/auth/github/callback",
+      callbackURL: `${process.env.API_URL || "http://localhost:4000"}/auth/github/callback`,
       scope: ["user:email"], // Important for GitHub to get email
     },
     handleSocialAuth

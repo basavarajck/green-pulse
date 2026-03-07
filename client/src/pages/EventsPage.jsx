@@ -206,6 +206,7 @@ const EventsPage = () => {
                 event={event}
                 onDelete={handleDelete}
                 onEdit={handleEdit}
+                isEditing={editingEvent?._id === event._id}
               />
             ))}
           </div>

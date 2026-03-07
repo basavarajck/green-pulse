@@ -177,6 +177,7 @@ const ProjectsPage = () => {
                   project={project}
                   onDelete={handleDelete}
                   onEdit={handleEdit}
+                  isEditing={editingProject?._id === project._id}
                 />
               ))}
             </div>

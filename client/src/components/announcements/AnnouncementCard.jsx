@@ -3,7 +3,7 @@ import React from 'react';
 import { Bell, Trash2, Edit } from 'lucide-react';
 import { isAdmin } from '../../utils/auth';
 
-const AnnouncementCard = ({ announcement, onDelete, onEdit }) => {
+const AnnouncementCard = ({ announcement, onDelete, onEdit, isEditing }) => {
   const { _id, title, content, date } = announcement;
 
   return (
@@ -44,7 +44,12 @@ const AnnouncementCard = ({ announcement, onDelete, onEdit }) => {
           )}
           <button
             onClick={() => onDelete(_id)}
-            className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg bg-red-900/50 border border-red-700/50 text-red-200 text-xs font-medium hover:bg-red-800/70 transition-all"
+            disabled={isEditing}
+            className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium transition-all ${
+              isEditing
+                ? 'bg-gray-800/30 border border-gray-700/30 text-gray-500 cursor-not-allowed opacity-50'
+                : 'bg-red-900/50 border border-red-700/50 text-red-200 hover:bg-red-800/70'
+            }`}
           >
             <Trash2 className="w-3.5 h-3.5" />
             Delete

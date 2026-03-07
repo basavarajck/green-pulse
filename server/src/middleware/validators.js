@@ -189,31 +189,22 @@ exports.teamMemberValidation = [
     .isLength({ max: 100 }).withMessage('Name must be less than 100 characters')
     .escape(),
   
-  body('position')
+  body('role')
     .trim()
-    .notEmpty().withMessage('Position is required')
-    .isLength({ max: 100 }).withMessage('Position must be less than 100 characters')
+    .notEmpty().withMessage('Role is required')
+    .isLength({ max: 100 }).withMessage('Role must be less than 100 characters')
     .escape(),
   
-  body('bio')
-    .optional()
-    .trim()
-    .isLength({ max: 1000 }).withMessage('Bio must be less than 1000 characters'),
-  
-  body('linkedin')
-    .optional()
-    .trim()
-    .isURL().withMessage('LinkedIn must be a valid URL'),
-  
-  body('github')
-    .optional()
-    .trim()
-    .isURL().withMessage('GitHub must be a valid URL'),
-  
   body('email')
+    .trim()
+    .notEmpty().withMessage('Email is required')
+    .isEmail().withMessage('Must be a valid email'),
+  
+  body('designation')
     .optional()
     .trim()
-    .isEmail().withMessage('Must be a valid email'),
+    .isLength({ max: 100 }).withMessage('Designation must be less than 100 characters')
+    .escape(),
   
   validate
 ];

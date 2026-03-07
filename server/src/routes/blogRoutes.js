@@ -18,7 +18,7 @@ router.get("/:id", getBlogById);
 
 // Admin-only routes with validation
 router.post("/", requireAuth, requireAdmin, blogValidation, addBlog);
-router.put("/", requireAuth, requireAdmin, blogValidation, updateBlog);
+router.put("/:id", requireAuth, requireAdmin, blogValidation, updateBlog);
 router.delete("/:id", requireAuth, requireAdmin, deleteBlog);
 
 module.exports = router;

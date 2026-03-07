@@ -185,6 +185,7 @@ const TeamPage = () => {
                 member={member}
                 onEdit={handleEdit}
                 onDelete={handleDelete}
+                isEditing={editingMember?._id === member._id}
               />
             ))}
           </div>

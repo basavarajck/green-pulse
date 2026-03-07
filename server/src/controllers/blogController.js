@@ -63,7 +63,7 @@ exports.addBlog = async (req, res) => {
 // UPDATE blog
 exports.updateBlog = async (req, res) => {
   try {
-    const updated = await Blog.findByIdAndUpdate(req.body._id, req.body, {
+    const updated = await Blog.findByIdAndUpdate(req.params.id, req.body, {
       new: true,
       runValidators: true
     });

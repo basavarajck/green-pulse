@@ -66,7 +66,24 @@ router.get(
 
 router.get(
   "/google/callback",
-  passport.authenticate("google", { session: false, failureRedirect: "/login" }),
+  (req, res, next) => {
+    passport.authenticate("google", { session: false }, (err, user, info) => {
+      if (err) {
+        // Redirect to frontend with error message
+        const errorMessage = encodeURIComponent(err.message || "Google authentication failed");
+        return res.redirect(`${process.env.CLIENT_URL}/login?error=${errorMessage}`);
+      }
+      
+      if (!user) {
+        const errorMessage = encodeURIComponent("Authentication failed. Please try again.");
+        return res.redirect(`${process.env.CLIENT_URL}/login?error=${errorMessage}`);
+      }
+      
+      // User authenticated successfully
+      req.user = user;
+      next();
+    })(req, res, next);
+  },
   generateTokenAndRedirect
 );
 
@@ -78,7 +95,24 @@ router.get(
 
 router.get(
   "/github/callback",
-  passport.authenticate("github", { session: false, failureRedirect: "/login" }),
+  (req, res, next) => {
+    passport.authenticate("github", { session: false }, (err, user, info) => {
+      if (err) {
+        // Redirect to frontend with error message
+        const errorMessage = encodeURIComponent(err.message || "GitHub authentication failed");
+        return res.redirect(`${process.env.CLIENT_URL}/login?error=${errorMessage}`);
+      }
+      
+      if (!user) {
+        const errorMessage = encodeURIComponent("Authentication failed. Please try again.");
+        return res.redirect(`${process.env.CLIENT_URL}/login?error=${errorMessage}`);
+      }
+      
+      // User authenticated successfully
+      req.user = user;
+      next();
+    })(req, res, next);
+  },
   generateTokenAndRedirect
 );
 

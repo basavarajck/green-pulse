@@ -30,7 +30,7 @@ exports.addProject = async (req, res) => {
 // UPDATE project
 exports.updateProject = async (req, res) => {
   try {
-    const updated = await Project.findByIdAndUpdate(req.body._id, req.body, { 
+    const updated = await Project.findByIdAndUpdate(req.params.id, req.body, { 
       new: true,
       runValidators: true
     });
