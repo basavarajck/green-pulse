@@ -54,9 +54,14 @@ app.use(cors({
 }));
 app.use(express.json());
 
-// Serve uploaded files as static assets 👈 NEW
-// e.g. GET http://localhost:4000/uploads/team/123.jpg
-app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
+// Serve uploaded files as static assets
+// In serverless environments (Vercel), files are stored in /tmp and cleared after function execution
+// You should use a cloud storage service (S3, Cloudinary, etc.) for persistent file storage
+if (process.env.VERCEL) {
+  app.use("/uploads", express.static("/tmp/uploads"));
+} else {
+  app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
+}
 
 // Initialize Passport (Important: Place before routes)
 require("./config/passport");

@@ -54,8 +54,11 @@ const generateTokenAndRedirect = (req, res) => {
     { expiresIn: "7d" }
   );
   
+  // Get client URL with fallback
+  const clientUrl = process.env.CLIENT_URL || "http://localhost:5173";
+  
   // Redirect to frontend with token
-  res.redirect(`${process.env.CLIENT_URL}/login/success?token=${token}`);
+  res.redirect(`${clientUrl}/login/success?token=${token}`);
 };
 
 // --- GOOGLE ---
@@ -68,15 +71,17 @@ router.get(
   "/google/callback",
   (req, res, next) => {
     passport.authenticate("google", { session: false }, (err, user, info) => {
+      const clientUrl = process.env.CLIENT_URL || "http://localhost:5173";
+      
       if (err) {
         // Redirect to frontend with error message
         const errorMessage = encodeURIComponent(err.message || "Google authentication failed");
-        return res.redirect(`${process.env.CLIENT_URL}/login?error=${errorMessage}`);
+        return res.redirect(`${clientUrl}/login?error=${errorMessage}`);
       }
       
       if (!user) {
         const errorMessage = encodeURIComponent("Authentication failed. Please try again.");
-        return res.redirect(`${process.env.CLIENT_URL}/login?error=${errorMessage}`);
+        return res.redirect(`${clientUrl}/login?error=${errorMessage}`);
       }
       
       // User authenticated successfully
@@ -97,15 +102,17 @@ router.get(
   "/github/callback",
   (req, res, next) => {
     passport.authenticate("github", { session: false }, (err, user, info) => {
+      const clientUrl = process.env.CLIENT_URL || "http://localhost:5173";
+      
       if (err) {
         // Redirect to frontend with error message
         const errorMessage = encodeURIComponent(err.message || "GitHub authentication failed");
-        return res.redirect(`${process.env.CLIENT_URL}/login?error=${errorMessage}`);
+        return res.redirect(`${clientUrl}/login?error=${errorMessage}`);
       }
       
       if (!user) {
         const errorMessage = encodeURIComponent("Authentication failed. Please try again.");
-        return res.redirect(`${process.env.CLIENT_URL}/login?error=${errorMessage}`);
+        return res.redirect(`${clientUrl}/login?error=${errorMessage}`);
       }
       
       // User authenticated successfully
