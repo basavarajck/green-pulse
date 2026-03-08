@@ -50,34 +50,40 @@ const transports = [
   // Console transport
   new winston.transports.Console({
     format,
-  }),
-  
-  // Error log file
-  new winston.transports.File({
-    filename: path.join(__dirname, '../../logs/error.log'),
-    level: 'error',
-    format: fileFormat,
-    maxsize: 5242880, // 5MB
-    maxFiles: 5,
-  }),
-  
-  // Combined log file
-  new winston.transports.File({
-    filename: path.join(__dirname, '../../logs/combined.log'),
-    format: fileFormat,
-    maxsize: 5242880, // 5MB
-    maxFiles: 5,
-  }),
-  
-  // HTTP requests log
-  new winston.transports.File({
-    filename: path.join(__dirname, '../../logs/http.log'),
-    level: 'http',
-    format: fileFormat,
-    maxsize: 5242880, // 5MB
-    maxFiles: 5,
-  }),
+  })
 ];
+
+// Only add file transports in non-serverless environments
+// Vercel and other serverless platforms have read-only file systems
+if (!process.env.VERCEL && !process.env.AWS_LAMBDA_FUNCTION_NAME) {
+  transports.push(
+    // Error log file
+    new winston.transports.File({
+      filename: path.join(__dirname, '../../logs/error.log'),
+      level: 'error',
+      format: fileFormat,
+      maxsize: 5242880, // 5MB
+      maxFiles: 5,
+    }),
+    
+    // Combined log file
+    new winston.transports.File({
+      filename: path.join(__dirname, '../../logs/combined.log'),
+      format: fileFormat,
+      maxsize: 5242880, // 5MB
+      maxFiles: 5,
+    }),
+    
+    // HTTP requests log
+    new winston.transports.File({
+      filename: path.join(__dirname, '../../logs/http.log'),
+      level: 'http',
+      format: fileFormat,
+      maxsize: 5242880, // 5MB
+      maxFiles: 5,
+    })
+  );
+}
 
 // Create logger
 const logger = winston.createLogger({

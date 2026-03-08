@@ -53,9 +53,14 @@ exports.updateMember = async (req, res) => {
 
     // If new image uploaded, delete old one
     if (req.file) {
-      const oldImagePath = path.join(__dirname, "../../", existing.image);
-      if (fs.existsSync(oldImagePath)) {
-        fs.unlinkSync(oldImagePath);
+      try {
+        const oldImagePath = path.join(__dirname, "../../", existing.image);
+        if (fs.existsSync(oldImagePath)) {
+          fs.unlinkSync(oldImagePath);
+        }
+      } catch (err) {
+        // Ignore file deletion errors in read-only environments (e.g., Vercel)
+        logger.warn(`Could not delete old image: ${err.message}`);
       }
       existing.image = `uploads/team/${req.file.filename}`;
     }
@@ -84,9 +89,14 @@ exports.deleteMember = async (req, res) => {
     if (!member) return res.status(404).json({ message: "Member not found" });
 
     // Delete image file from disk
-    const imagePath = path.join(__dirname, "../../", member.image);
-    if (fs.existsSync(imagePath)) {
-      fs.unlinkSync(imagePath);
+    try {
+      const imagePath = path.join(__dirname, "../../", member.image);
+      if (fs.existsSync(imagePath)) {
+        fs.unlinkSync(imagePath);
+      }
+    } catch (err) {
+      // Ignore file deletion errors in read-only environments (e.g., Vercel)
+      logger.warn(`Could not delete image file: ${err.message}`);
     }
 
     await TeamMember.findByIdAndDelete(id);
