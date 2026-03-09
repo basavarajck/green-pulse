@@ -118,7 +118,7 @@ exports.blogValidation = [
     .trim()
     .isLength({ max: 500 }).withMessage('Summary must be less than 500 characters'),
   
-  body('image')
+  body('coverImage')
     .optional({ checkFalsy: true })
     .trim()
     .isURL({ require_protocol: false }).withMessage('Please enter a valid image URL (e.g., https://example.com/blog-cover.jpg) or leave empty'),
