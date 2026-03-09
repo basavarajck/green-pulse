@@ -124,6 +124,7 @@ const BlogsPage = () => {
         {/* Admin Form */}
         {(isAdmin() || editingBlog) && (
           <BlogForm
+            key={editingBlog?._id || 'new'}
             onSubmit={editingBlog ? handleUpdate : handleCreate}
             onCancel={() => setEditingBlog(null)}
             initialData={editingBlog}

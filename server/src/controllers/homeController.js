@@ -1,14 +1,13 @@
 const Home = require("../models/Home");
+const logger = require("../config/logger");
 
 // GET /home
 exports.getHome = async (req, res) => {
   try {
-    console.log("➡ GET /home called");
     const homeData = await Home.findOne();
-    console.log("✔ Home data:", homeData);
     res.json(homeData);
   } catch (error) {
-    console.error("❌ ERROR in getHome:", error);
+    logger.error("Error in getHome:", error);
     res.status(500).json({ message: "Error fetching home data" });
   }
 };
@@ -31,7 +30,7 @@ exports.updateHome = async (req, res) => {
     await homeData.save();
     res.json({ message: "Home data updated", homeData });
   } catch (error) {
-    console.error("❌ ERROR in updateHome:", error);
+    logger.error("Error in updateHome:", error);
     res.status(500).json({ message: "Error updating home data" });
   }
 };

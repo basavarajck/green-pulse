@@ -2,6 +2,7 @@
 const multer = require("multer");
 const path = require("path");
 const fs = require("fs");
+const logger = require("./logger");
 
 // Determine upload directory based on environment
 // In serverless (Vercel), use /tmp; locally use uploads/team
@@ -15,7 +16,7 @@ try {
     fs.mkdirSync(uploadDir, { recursive: true });
   }
 } catch (error) {
-  console.warn("Warning: Could not create upload directory. Running in read-only environment?", error.message);
+  logger.warn("Warning: Could not create upload directory. Running in read-only environment?", error.message);
   // Don't crash - let it fail later if uploads are attempted
 }
 

@@ -2,6 +2,7 @@ const User = require("../models/User");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const adminEmails = require("../config/adminEmails");
+const logger = require("../config/logger");
 
 // SIGNUP
 exports.signup = async (req, res) => {
@@ -32,7 +33,7 @@ exports.signup = async (req, res) => {
       }
     });
   } catch (err) {
-    console.error(err);
+    logger.error('Signup error:', err);
     res.status(500).json({ message: "Signup error" });
   }
 };
@@ -60,7 +61,7 @@ exports.login = async (req, res) => {
       role: user.role
     });
   } catch (err) {
-    console.error(err);
+    logger.error('Login error:', err);
     res.status(500).json({ message: "Login error" });
   }
 };

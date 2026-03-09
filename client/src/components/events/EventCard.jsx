@@ -20,7 +20,6 @@ const EventCard = ({ event, onDelete, onEdit, isEditing }) => {
 
   const handleImageError = () => {
     setImageError(true);
-    console.log('Image failed to load:', image);
   };
 
   const getImageUrl = (url) => {

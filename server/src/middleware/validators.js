@@ -52,32 +52,44 @@ exports.loginValidation = [
 exports.eventValidation = [
   body('title')
     .trim()
-    .notEmpty().withMessage('Title is required')
-    .isLength({ max: 200 }).withMessage('Title must be less than 200 characters')
+    .notEmpty().withMessage('Event title is required. Please enter a descriptive title for your event')
+    .isLength({ min: 3, max: 200 }).withMessage('Event title must be between 3 and 200 characters')
     .escape(), // Sanitize against XSS
   
   body('description')
     .trim()
-    .notEmpty().withMessage('Description is required')
-    .isLength({ max: 2000 }).withMessage('Description must be less than 2000 characters'),
+    .notEmpty().withMessage('Event description is required. Please describe what the event is about')
+    .isLength({ min: 10, max: 2000 }).withMessage('Event description must be between 10 and 2000 characters'),
   
   body('date')
-    .notEmpty().withMessage('Date is required')
-    .isISO8601().withMessage('Must be a valid date'),
+    .notEmpty().withMessage('Event date is required. Please select a date for the event')
+    .isISO8601().withMessage('Invalid date format. Please select a valid date from the calendar'),
   
   body('image')
-    .optional()
+    .optional({ checkFalsy: true }) // Skip validation if empty string
     .trim()
-    .isURL().withMessage('Image must be a valid URL'),
+    .custom((value) => {
+      if (!value) return true; // If empty, it's valid (optional field)
+      // Simple check: must contain at least one dot and look like a URL
+      const urlPattern = /^(https?:\/\/)?([\w\-]+)(\.[\w\-]+)+(\/[\w\-\.~:/?#[\]@!$&'()*+,;=%]*)?$/i;
+      if (urlPattern.test(value) || value.includes('.')) return true;
+      throw new Error('Please enter a valid image URL (e.g., https://example.com/poster.jpg or leave empty)');
+    }),
   
   body('link')
-    .optional()
+    .optional({ checkFalsy: true }) // Skip validation if empty string
     .trim()
-    .isURL().withMessage('Link must be a valid URL'),
+    .custom((value) => {
+      if (!value) return true; // If empty, it's valid (optional field)
+      // Accept any URL-like string with a dot (forms.com, forms.gle/xyz, etc.)
+      const urlPattern = /^(https?:\/\/)?([\w\-]+)(\.[\w\-]+)+(\/[\w\-\.~:/?#[\]@!$&'()*+,;=%]*)?$/i;
+      if (urlPattern.test(value) || value.includes('.')) return true;
+      throw new Error('Please enter a valid registration link (e.g., https://forms.gle/xyz, forms.com, or example.com/register)');
+    }),
   
   body('isUpcoming')
     .optional()
-    .isBoolean().withMessage('isUpcoming must be a boolean'),
+    .isBoolean().withMessage('Invalid upcoming status'),
   
   validate
 ];
@@ -102,14 +114,14 @@ exports.blogValidation = [
     .isLength({ max: 50000 }).withMessage('Content must be less than 50000 characters'),
   
   body('summary')
-    .optional()
+    .optional({ checkFalsy: true })
     .trim()
     .isLength({ max: 500 }).withMessage('Summary must be less than 500 characters'),
   
   body('image')
-    .optional()
+    .optional({ checkFalsy: true })
     .trim()
-    .isURL().withMessage('Image must be a valid URL'),
+    .isURL({ require_protocol: false }).withMessage('Please enter a valid image URL (e.g., https://example.com/blog-cover.jpg) or leave empty'),
   
   body('tags')
     .optional()
@@ -136,19 +148,19 @@ exports.projectValidation = [
     .isLength({ max: 2000 }).withMessage('Description must be less than 2000 characters'),
   
   body('image')
-    .optional()
+    .optional({ checkFalsy: true })
     .trim()
-    .isURL().withMessage('Image must be a valid URL'),
+    .isURL({ require_protocol: false }).withMessage('Please enter a valid project image URL (e.g., https://example.com/project.png) or leave empty'),
   
   body('github')
-    .optional()
+    .optional({ checkFalsy: true })
     .trim()
-    .isURL().withMessage('GitHub link must be a valid URL'),
+    .isURL({ require_protocol: false }).withMessage('Please enter a valid GitHub repository URL (e.g., https://github.com/user/repo) or leave empty'),
   
   body('live')
-    .optional()
+    .optional({ checkFalsy: true })
     .trim()
-    .isURL().withMessage('Live demo link must be a valid URL'),
+    .isURL({ require_protocol: false }).withMessage('Please enter a valid live demo URL (e.g., https://your-project.com) or leave empty'),
   
   body('stack')
     .optional()
@@ -175,7 +187,7 @@ exports.announcementValidation = [
     .isLength({ max: 5000 }).withMessage('Content must be less than 5000 characters'),
   
   body('date')
-    .optional()
+    .optional({ checkFalsy: true })
     .isISO8601().withMessage('Must be a valid date'),
   
   validate
@@ -201,7 +213,7 @@ exports.teamMemberValidation = [
     .isEmail().withMessage('Must be a valid email'),
   
   body('designation')
-    .optional()
+    .optional({ checkFalsy: true })
     .trim()
     .isLength({ max: 100 }).withMessage('Designation must be less than 100 characters')
     .escape(),

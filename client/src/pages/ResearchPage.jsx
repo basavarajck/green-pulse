@@ -1,5 +1,5 @@
 // src/pages/ResearchPage.jsx - FIXED VERSION
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import { ChevronLeft, Microscope, FileText, Users, Award } from 'lucide-react';
 import ResearchForm from '../components/research/ResearchForm';
@@ -22,32 +22,27 @@ const ResearchPage = () => {
   const domain = searchParams.get('domain');
   const [content, setContent] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
   const [showForm, setShowForm] = useState(false);
+
+  const fetchDomainContent = useCallback(async () => {
+    try {
+      setLoading(true);
+      const data = await getResearchByDomain(domain);
+      setContent(data);
+    } catch {
+      setContent(null);
+    } finally {
+      setLoading(false);
+    }
+  }, [domain]);
 
   useEffect(() => {
     if (domain) {
       fetchDomainContent();
     } else {
       setContent(null);
-      setError('');
     }
-  }, [domain]);
-
-  const fetchDomainContent = async () => {
-    try {
-      setLoading(true);
-      setError('');
-      const data = await getResearchByDomain(domain);
-      setContent(data);
-    } catch (err) {
-      console.log('Error fetching research:', err.message);
-      setError(err.message);
-      setContent(null);
-    } finally {
-      setLoading(false);
-    }
-  };
+  }, [domain, fetchDomainContent]);
 
   const handleDeleteProject = async (projectId) => {
     if (!confirm('Delete this project?')) return;

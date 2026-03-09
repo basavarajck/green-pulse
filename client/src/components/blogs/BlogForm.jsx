@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, X, Image as ImageIcon } from 'lucide-react';
 import { isAdmin } from '../../utils/auth';
+import { isValidURL } from '../../utils/formValidation';
 
 const BlogForm = ({ onSubmit, onCancel, initialData = {}, loading }) => {
   const [formData, setFormData] = useState({
@@ -35,7 +36,8 @@ const BlogForm = ({ onSubmit, onCancel, initialData = {}, loading }) => {
         tags: []
       });
     }
-  }, [initialData]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialData?._id]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -57,14 +59,78 @@ const BlogForm = ({ onSubmit, onCancel, initialData = {}, loading }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!formData.title.trim() || !formData.author.trim() || !formData.content.trim() || !formData.date.trim()) {
-      alert('Title, author, content, and date are required');
+    
+    // Validate Title
+    if (!formData.title || !formData.title.trim()) {
+      alert('❌ Blog title is required');
       return;
     }
+    if (formData.title.trim().length < 3) {
+      alert('❌ Blog title must be at least 3 characters long');
+      return;
+    }
+    if (formData.title.trim().length > 200) {
+      alert('❌ Blog title must be less than 200 characters');
+      return;
+    }
+    
+    // Validate Author
+    if (!formData.author || !formData.author.trim()) {
+      alert('❌ Author name is required');
+      return;
+    }
+    if (formData.author.trim().length < 2) {
+      alert('❌ Author name must be at least 2 characters long');
+      return;
+    }
+    if (formData.author.trim().length > 100) {
+      alert('❌ Author name must be less than 100 characters');
+      return;
+    }
+    
+    // Validate Content
+    if (!formData.content || !formData.content.trim()) {
+      alert('❌ Blog content is required');
+      return;
+    }
+    if (formData.content.trim().length < 10) {
+      alert('❌ Blog content must be at least 10 characters long');
+      return;
+    }
+    if (formData.content.trim().length > 50000) {
+      alert('❌ Blog content must be less than 50000 characters');
+      return;
+    }
+    
+    // Validate Date
+    if (!formData.date || !formData.date.trim()) {
+      alert('❌ Blog date is required');
+      return;
+    }
+    
+    // Validate Cover Image URL if provided
+    if (formData.coverImage && formData.coverImage.trim() && !isValidURL(formData.coverImage.trim())) {
+      alert('❌ Please enter a valid cover image URL or leave it empty');
+      return;
+    }
+    
+    // Validate tags count
+    if (formData.tags.length > 10) {
+      alert('❌ Maximum 10 tags allowed');
+      return;
+    }
+    
+    // Clean optional fields
+    const submitData = { ...formData };
+    if (!submitData.coverImage || !submitData.coverImage.trim()) {
+      delete submitData.coverImage;
+    }
+    
     // Include _id when editing
-    const submitData = initialData && initialData._id 
-      ? { ...formData, _id: initialData._id }
-      : formData;
+    if (initialData && initialData._id) {
+      submitData._id = initialData._id;
+    }
+    
     onSubmit(submitData);
   };
 
@@ -91,12 +157,18 @@ const BlogForm = ({ onSubmit, onCancel, initialData = {}, loading }) => {
       <form onSubmit={handleSubmit} className="grid gap-6">
         {/* Title */}
         <div>
-          <label className="block mb-2 text-sm font-semibold text-green-300">Blog Title *</label>
+          <div className="flex justify-between items-center mb-2">
+            <label className="text-sm font-semibold text-green-300">Blog Title *</label>
+            <span className={`text-xs ${formData.title.length < 3 ? 'text-red-400' : formData.title.length > 200 ? 'text-red-400' : 'text-gray-400'}`}>
+              {formData.title.length}/200 {formData.title.length < 3 && '(min 3)'}
+            </span>
+          </div>
           <input
             name="title"
             value={formData.title}
             onChange={handleChange}
             required
+            maxLength={200}
             className="w-full px-4 py-3 rounded-xl border border-green-800/50 bg-gray-900/50 text-white placeholder-gray-500 focus:border-green-500 focus:ring-2 focus:ring-green-500/50 transition-all"
             placeholder="e.g. My Journey with Sustainable Farming"
           />
@@ -105,12 +177,18 @@ const BlogForm = ({ onSubmit, onCancel, initialData = {}, loading }) => {
         {/* Author & Date */}
         <div className="grid gap-6 md:grid-cols-2">
           <div>
-            <label className="block mb-2 text-sm font-semibold text-green-300">Author Name *</label>
+            <div className="flex justify-between items-center mb-2">
+              <label className="text-sm font-semibold text-green-300">Author Name *</label>
+              <span className={`text-xs ${formData.author.length < 2 ? 'text-red-400' : formData.author.length > 100 ? 'text-red-400' : 'text-gray-400'}`}>
+                {formData.author.length}/100 {formData.author.length < 2 && '(min 2)'}
+              </span>
+            </div>
             <input
               name="author"
               value={formData.author}
               onChange={handleChange}
               required
+              maxLength={100}
               className="w-full px-4 py-3 rounded-xl border border-green-800/50 bg-gray-900/50 text-white placeholder-gray-500 focus:border-green-500 focus:ring-2 focus:ring-green-500/50 transition-all"
               placeholder="Your name"
             />
@@ -133,7 +211,7 @@ const BlogForm = ({ onSubmit, onCancel, initialData = {}, loading }) => {
         <div>
           <label className="block mb-2 text-sm font-semibold text-green-300 flex items-center gap-2">
             <ImageIcon className="w-4 h-4" />
-            Cover Image URL (paste link)
+            Cover Image URL (Optional)
           </label>
           <input
             name="coverImage"
@@ -167,9 +245,14 @@ const BlogForm = ({ onSubmit, onCancel, initialData = {}, loading }) => {
 
         {/* Content - Simple Text Area */}
         <div>
-          <label className="block mb-2 text-sm font-semibold text-green-300">
-            Blog Content * 
-          </label>
+          <div className="flex justify-between items-center mb-2">
+            <label className="text-sm font-semibold text-green-300">
+              Blog Content * 
+            </label>
+            <span className={`text-xs ${formData.content.length < 10 ? 'text-red-400' : formData.content.length > 50000 ? 'text-red-400' : 'text-gray-400'}`}>
+              {formData.content.length}/50000 {formData.content.length < 10 && '(min 10)'}
+            </span>
+          </div>
           <div className="mb-2 p-3 rounded-lg bg-green-900/20 border border-green-700/30 text-xs text-green-200">
             <div className="flex items-start gap-2">
               <ImageIcon className="w-4 h-4 mt-0.5 flex-shrink-0" />
@@ -188,6 +271,7 @@ const BlogForm = ({ onSubmit, onCancel, initialData = {}, loading }) => {
             onChange={handleChange}
             required
             rows={16}
+            maxLength={50000}
             className="w-full px-4 py-3 rounded-xl border border-green-800/50 bg-gray-900/50 text-white placeholder-gray-400 focus:border-green-500 focus:ring-2 focus:ring-green-500/50 transition-all resize-vertical text-base leading-relaxed"
             placeholder={`Write your blog here. Press Enter for new paragraphs.
 

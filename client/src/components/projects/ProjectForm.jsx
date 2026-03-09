@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, X } from 'lucide-react';
 import { isAdmin } from '../../utils/auth';
+import { isValidURL } from '../../utils/formValidation';
 
 const ProjectForm = ({ onSubmit, onCancel, initialData = {}, loading }) => {
   const [formData, setFormData] = useState({
@@ -64,10 +65,64 @@ const ProjectForm = ({ onSubmit, onCancel, initialData = {}, loading }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!formData.title.trim() || !formData.description.trim()) {
-      alert('Title and description are required');
+    
+    // Validate Title
+    if (!formData.title || !formData.title.trim()) {
+      alert('❌ Project title is required');
       return;
     }
+    if (formData.title.trim().length < 3) {
+      alert('❌ Project title must be at least 3 characters long');
+      return;
+    }
+    if (formData.title.trim().length > 200) {
+      alert('❌ Project title must be less than 200 characters');
+      return;
+    }
+    
+    // Validate Description
+    if (!formData.description || !formData.description.trim()) {
+      alert('❌ Project description is required');
+      return;
+    }
+    if (formData.description.trim().length < 10) {
+      alert('❌ Project description must be at least 10 characters long');
+      return;
+    }
+    if (formData.description.trim().length > 2000) {
+      alert('❌ Project description must be less than 2000 characters');
+      return;
+    }
+    
+    // Validate optional URL fields if provided
+    if (formData.image && formData.image.trim() && !isValidURL(formData.image.trim())) {
+      alert('❌ Please enter a valid image URL or leave it empty');
+      return;
+    }
+    
+    if (formData.link && formData.link.trim() && !isValidURL(formData.link.trim())) {
+      alert('❌ Please enter a valid project link or leave it empty');
+      return;
+    }
+    
+    // Validate stack count
+    if (formData.stack.length > 20) {
+      alert('❌ Maximum 20 technologies allowed');
+      return;
+    }
+    
+    // Clean optional fields
+    const submitData = { ...formData };
+    if (!submitData.image || !submitData.image.trim()) delete submitData.image;
+    if (!submitData.link || !submitData.link.trim()) delete submitData.link;
+    
+    // Include _id when editing
+    if (initialData && initialData._id) {
+      submitData._id = initialData._id;
+    }
+    
+    onSubmit(submitData);
+  };
     // Include _id when editing
     const submitData = initialData && initialData._id 
       ? { ...formData, _id: initialData._id }
@@ -102,12 +157,18 @@ const ProjectForm = ({ onSubmit, onCancel, initialData = {}, loading }) => {
         <form onSubmit={handleSubmit} className="grid gap-6 md:grid-cols-2">
           {/* Title */}
           <div className="md:col-span-2">
-            <label className="block mb-2 text-sm font-semibold text-cyan-300">Project Title *</label>
+            <div className="flex justify-between items-center mb-2">
+              <label className="text-sm font-semibold text-cyan-300">Project Title *</label>
+              <span className={`text-xs ${formData.title.length < 3 ? 'text-red-400' : formData.title.length > 200 ? 'text-red-400' : 'text-gray-400'}`}>
+                {formData.title.length}/200 {formData.title.length < 3 && '(min 3)'}
+              </span>
+            </div>
             <input
               name="title"
               value={formData.title}
               onChange={handleChange}
               required
+              maxLength={200}
               className="w-full px-4 py-3 rounded-xl border border-cyan-800/50 bg-slate-900/50 text-white placeholder-gray-500 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/50 transition-all"
               placeholder="e.g. Smart Irrigation System"
             />
@@ -127,7 +188,7 @@ const ProjectForm = ({ onSubmit, onCancel, initialData = {}, loading }) => {
 
           {/* Link */}
           <div>
-            <label className="block mb-2 text-sm font-semibold text-cyan-300">Project Link</label>
+            <label className="block mb-2 text-sm font-semibold text-cyan-300">Project Link (Optional)</label>
             <input
               name="link"
               value={formData.link}
@@ -135,11 +196,12 @@ const ProjectForm = ({ onSubmit, onCancel, initialData = {}, loading }) => {
               className="w-full px-4 py-3 rounded-xl border border-cyan-800/50 bg-slate-900/50 text-white placeholder-gray-500 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/50 transition-all"
               placeholder="https://github.com/username/project"
             />
+            <p className="mt-1 text-xs text-gray-500">GitHub, website, or demo link</p>
           </div>
 
           {/* Image */}
           <div className="md:col-span-2">
-            <label className="block mb-2 text-sm font-semibold text-cyan-300">Project Image URL</label>
+            <label className="block mb-2 text-sm font-semibold text-cyan-300">Project Image URL (Optional)</label>
             <input
               name="image"
               value={formData.image}
@@ -151,13 +213,19 @@ const ProjectForm = ({ onSubmit, onCancel, initialData = {}, loading }) => {
 
           {/* Description */}
           <div className="md:col-span-2">
-            <label className="block mb-2 text-sm font-semibold text-cyan-300">Description *</label>
+            <div className="flex justify-between items-center mb-2">
+              <label className="text-sm font-semibold text-cyan-300">Description *</label>
+              <span className={`text-xs ${formData.description.length < 10 ? 'text-red-400' : formData.description.length > 2000 ? 'text-red-400' : 'text-gray-400'}`}>
+                {formData.description.length}/2000 {formData.description.length < 10 && '(min 10)'}
+              </span>
+            </div>
             <textarea
               name="description"
               value={formData.description}
               onChange={handleChange}
               required
               rows={4}
+              maxLength={2000}
               className="w-full px-4 py-3 rounded-xl border border-cyan-800/50 bg-slate-900/50 text-white placeholder-gray-500 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/50 transition-all resize-vertical"
               placeholder="Brief description of the project..."
             />

@@ -1,6 +1,7 @@
 // src/components/events/EventForm.jsx - FIXED VERSION
 import React, { useState, useEffect } from 'react';
 import { isAdmin } from '../../utils/auth';
+import { isValidURL } from '../../utils/formValidation';
 
 const EventForm = ({ onSubmit, onCancel, initialData = {}, loading }) => {
   const [formData, setFormData] = useState({
@@ -12,7 +13,7 @@ const EventForm = ({ onSubmit, onCancel, initialData = {}, loading }) => {
     isUpcoming: true
   });
 
-  // FIXED: Safe initialData handling
+  // FIXED: Safe initialData handling with proper dependency
   useEffect(() => {
     if (initialData && initialData._id) {
       // Edit mode
@@ -35,7 +36,8 @@ const EventForm = ({ onSubmit, onCancel, initialData = {}, loading }) => {
         isUpcoming: true
       });
     }
-  }, [initialData]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialData?._id]);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -47,17 +49,67 @@ const EventForm = ({ onSubmit, onCancel, initialData = {}, loading }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!formData.title.trim() || !formData.description.trim() || !formData.date.trim()) {
-      alert('Title, description, and date are required');
+    
+    // Validate required fields
+    if (!formData.title || !formData.title.trim()) {
+      alert('❌ Event title is required');
       return;
     }
+    
+    if (formData.title.trim().length < 3) {
+      alert('❌ Event title must be at least 3 characters long');
+      return;
+    }
+    
+    if (formData.title.trim().length > 200) {
+      alert('❌ Event title must be less than 200 characters');
+      return;
+    }
+    
+    if (!formData.description || !formData.description.trim()) {
+      alert('❌ Event description is required');
+      return;
+    }
+    
+    if (formData.description.trim().length < 10) {
+      alert('❌ Event description must be at least 10 characters long');
+      return;
+    }
+    
+    if (formData.description.trim().length > 2000) {
+      alert('❌ Event description must be less than 2000 characters');
+      return;
+    }
+    
+    if (!formData.date || !formData.date.trim()) {
+      alert('❌ Event date is required');
+      return;
+    }
+    
+    // Validate optional URL fields if provided
+    if (formData.image && formData.image.trim() && !isValidURL(formData.image.trim())) {
+      alert('❌ Please enter a valid image URL (e.g., https://example.com/poster.jpg) or leave it empty');
+      return;
+    }
+    
+    if (formData.link && formData.link.trim() && !isValidURL(formData.link.trim())) {
+      alert('❌ Please enter a valid registration link (e.g., https://forms.gle/xyz) or leave it empty');
+      return;
+    }
+    
+    // Filter out empty strings for optional fields
+    const submitData = { ...formData };
+    if (!submitData.image || !submitData.image.trim()) delete submitData.image;
+    if (!submitData.link || !submitData.link.trim()) delete submitData.link;
+    
     // Include _id when editing
-    const submitData = initialData && initialData._id 
-      ? { ...formData, _id: initialData._id }
-      : formData;
+    if (initialData && initialData._id) {
+      submitData._id = initialData._id;
+    }
+    
     onSubmit(submitData);
   };
-
+  
   // FIXED: Early return if not admin
   if (!isAdmin()) return null;
 
@@ -84,7 +136,12 @@ const EventForm = ({ onSubmit, onCancel, initialData = {}, loading }) => {
       <form onSubmit={handleSubmit} className="grid gap-6 md:grid-cols-2">
         {/* Title */}
         <div className="md:col-span-2">
-          <label className="block mb-2 text-sm font-semibold text-green-300">Event Title *</label>
+          <div className="flex justify-between items-center mb-2">
+            <label className="text-sm font-semibold text-green-300">Event Title *</label>
+            <span className={`text-xs ${formData.title.length < 3 ? 'text-red-400' : formData.title.length > 200 ? 'text-red-400' : 'text-gray-400'}`}>
+              {formData.title.length}/200 {formData.title.length < 3 && '(min 3)'}
+            </span>
+          </div>
           <input
             name="title"
             value={formData.title}
@@ -92,6 +149,7 @@ const EventForm = ({ onSubmit, onCancel, initialData = {}, loading }) => {
             required
             className="w-full px-4 py-3 rounded-xl border border-green-800/50 bg-gray-900/50 text-white placeholder-gray-500 focus:border-green-500 focus:ring-2 focus:ring-green-500/50 transition-all"
             placeholder="e.g. Campus Cleanup Drive 2025"
+            maxLength={200}
           />
         </div>
 
@@ -110,7 +168,7 @@ const EventForm = ({ onSubmit, onCancel, initialData = {}, loading }) => {
 
         {/* Image URL */}
         <div>
-          <label className="block mb-2 text-sm font-semibold text-green-300">Poster Image</label>
+          <label className="block mb-2 text-sm font-semibold text-green-300">Poster Image (Optional)</label>
           <input
             name="image"
             value={formData.image}
@@ -118,23 +176,30 @@ const EventForm = ({ onSubmit, onCancel, initialData = {}, loading }) => {
             className="w-full px-4 py-3 rounded-xl border border-green-800/50 bg-gray-900/50 text-white placeholder-gray-500 focus:border-green-500 focus:ring-2 focus:ring-green-500/50 transition-all"
             placeholder="https://example.com/event-poster.jpg"
           />
+          <p className="mt-1 text-xs text-gray-500">Leave empty if no poster</p>
         </div>
 
         {/* Registration Link */}
         <div className="md:col-span-2">
-          <label className="block mb-2 text-sm font-semibold text-green-300">Registration Link</label>
+          <label className="block mb-2 text-sm font-semibold text-green-300">Registration Link (Optional)</label>
           <input
             name="link"
             value={formData.link}
             onChange={handleChange}
             className="w-full px-4 py-3 rounded-xl border border-green-800/50 bg-gray-900/50 text-white placeholder-gray-500 focus:border-green-500 focus:ring-2 focus:ring-green-500/50 transition-all"
-            placeholder="https://forms.gle/registration-link"
+            placeholder="https://forms.gle/xyz or https://example.com/register"
           />
+          <p className="mt-1 text-xs text-gray-500">Google Forms, Eventbrite, or any registration page</p>
         </div>
 
         {/* Description */}
         <div className="md:col-span-2">
-          <label className="block mb-2 text-sm font-semibold text-green-300">Description *</label>
+          <div className="flex justify-between items-center mb-2">
+            <label className="text-sm font-semibold text-green-300">Description *</label>
+            <span className={`text-xs ${formData.description.length < 10 ? 'text-red-400' : formData.description.length > 2000 ? 'text-red-400' : 'text-gray-400'}`}>
+              {formData.description.length}/2000 {formData.description.length < 10 && '(min 10)'}
+            </span>
+          </div>
           <textarea
             name="description"
             value={formData.description}
@@ -143,6 +208,7 @@ const EventForm = ({ onSubmit, onCancel, initialData = {}, loading }) => {
             rows={4}
             className="w-full px-4 py-3 rounded-xl border border-green-800/50 bg-gray-900/50 text-white placeholder-gray-500 focus:border-green-500 focus:ring-2 focus:ring-green-500/50 transition-all resize-vertical"
             placeholder="Brief description of the event..."
+            maxLength={2000}
           />
         </div>
 
