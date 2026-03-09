@@ -45,6 +45,7 @@ app.use(cors({
     const allowedOrigins = [
       "https://green-pulse-ten.vercel.app",
       "https://greenpulsejssstu.vercel.app",
+      "https://greenpulsesjce.vercel.app",
       "http://localhost:5173",
       "http://localhost:5174"
     ];
@@ -54,7 +55,8 @@ app.use(cors({
       !origin ||
       allowedOrigins.includes(origin) ||
       /^https:\/\/greenpulsejssstu.*\.vercel\.app$/.test(origin) ||
-      /^https:\/\/green-pulse.*\.vercel\.app$/.test(origin)
+      /^https:\/\/green-pulse.*\.vercel\.app$/.test(origin) ||
+      /^https:\/\/greenpulsesjce.*\.vercel\.app$/.test(origin)
     ) {
       callback(null, true);
     } else {
