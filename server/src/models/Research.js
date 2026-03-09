@@ -23,7 +23,7 @@ const projectSchema = new mongoose.Schema({
   endDate: Date,
   image: String,
   documents: [String]
-}, { _id: false });
+});
 
 const researchSchema = new mongoose.Schema({
   domain: {

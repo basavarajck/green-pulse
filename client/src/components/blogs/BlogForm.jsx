@@ -119,19 +119,7 @@ const BlogForm = ({ onSubmit, onCancel, initialData = {}, loading }) => {
       alert('❌ Maximum 10 tags allowed');
       return;
     }
-    
-    // Clean optional fields
-    const submitData = { ...formData };
-    if (!submitData.coverImage || !submitData.coverImage.trim()) {
-      delete submitData.coverImage;
-    }
-    
-    // Include _id when editing
-    if (initialData && initialData._id) {
-      submitData._id = initialData._id;
-    }
-    
-    onSubmit(submitData);
+    onSubmit(formData);
   };
 
   if (!isAdmin()) return null;
@@ -209,9 +197,8 @@ const BlogForm = ({ onSubmit, onCancel, initialData = {}, loading }) => {
 
         {/* Cover Image */}
         <div>
-          <label className="block mb-2 text-sm font-semibold text-green-300 flex items-center gap-2">
-            <ImageIcon className="w-4 h-4" />
-            Cover Image URL (Optional)
+          <label className="block mb-2 text-sm font-semibold text-green-300">
+            Cover Image URL
           </label>
           <input
             name="coverImage"
@@ -245,14 +232,9 @@ const BlogForm = ({ onSubmit, onCancel, initialData = {}, loading }) => {
 
         {/* Content - Simple Text Area */}
         <div>
-          <div className="flex justify-between items-center mb-2">
-            <label className="text-sm font-semibold text-green-300">
-              Blog Content * 
-            </label>
-            <span className={`text-xs ${formData.content.length < 10 ? 'text-red-400' : formData.content.length > 50000 ? 'text-red-400' : 'text-gray-400'}`}>
-              {formData.content.length}/50000 {formData.content.length < 10 && '(min 10)'}
-            </span>
-          </div>
+          <label className="block mb-2 text-sm font-semibold text-green-300">
+            Blog Content * 
+          </label>
           <div className="mb-2 p-3 rounded-lg bg-green-900/20 border border-green-700/30 text-xs text-green-200">
             <div className="flex items-start gap-2">
               <ImageIcon className="w-4 h-4 mt-0.5 flex-shrink-0" />

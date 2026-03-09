@@ -24,7 +24,8 @@ const AnnouncementForm = ({ onSubmit, onCancel, initialData = {}, loading }) => 
         date: ''
       });
     }
-  }, [initialData]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialData?._id]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;

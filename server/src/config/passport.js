@@ -73,28 +73,36 @@ const handleSocialAuth = async (accessToken, refreshToken, profile, done) => {
 };
 
 // Google Strategy
-passport.use(
-  new GoogleStrategy(
-    {
-      clientID: process.env.GOOGLE_CLIENT_ID,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-      callbackURL: `${process.env.API_URL || "http://localhost:4000"}/auth/google/callback`,
-    },
-    handleSocialAuth
-  )
-);
+if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
+  passport.use(
+    new GoogleStrategy(
+      {
+        clientID: process.env.GOOGLE_CLIENT_ID,
+        clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+        callbackURL: `${process.env.API_URL || "http://localhost:4000"}/auth/google/callback`,
+      },
+      handleSocialAuth
+    )
+  );
+} else {
+  console.warn('Google OAuth not configured: GOOGLE_CLIENT_ID or GOOGLE_CLIENT_SECRET missing');
+}
 
 // GitHub Strategy
-passport.use(
-  new GitHubStrategy(
-    {
-      clientID: process.env.GITHUB_CLIENT_ID,
-      clientSecret: process.env.GITHUB_CLIENT_SECRET,
-      callbackURL: `${process.env.API_URL || "http://localhost:4000"}/auth/github/callback`,
-      scope: ["user:email"], // Important for GitHub to get email
-    },
-    handleSocialAuth
-  )
-);
+if (process.env.GITHUB_CLIENT_ID && process.env.GITHUB_CLIENT_SECRET) {
+  passport.use(
+    new GitHubStrategy(
+      {
+        clientID: process.env.GITHUB_CLIENT_ID,
+        clientSecret: process.env.GITHUB_CLIENT_SECRET,
+        callbackURL: `${process.env.API_URL || "http://localhost:4000"}/auth/github/callback`,
+        scope: ["user:email"], // Important for GitHub to get email
+      },
+      handleSocialAuth
+    )
+  );
+} else {
+  console.warn('GitHub OAuth not configured: GITHUB_CLIENT_ID or GITHUB_CLIENT_SECRET missing');
+}
 
 module.exports = passport;
