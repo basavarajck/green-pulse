@@ -10,6 +10,17 @@ const compression = require("compression"); // Response compression
 const morgan = require("morgan"); // HTTP request logger
 const logger = require("./config/logger"); // Winston logger
 
+// Verify critical environment variables
+if (!process.env.MONGO_URI) {
+  logger.error("FATAL: MONGO_URI environment variable is not set!");
+  process.exit(1);
+}
+
+if (!process.env.JWT_SECRET) {
+  logger.error("FATAL: JWT_SECRET environment variable is not set!");
+  process.exit(1);
+}
+
 // Initialize app
 const app = express();
 
@@ -99,43 +110,56 @@ const authRoutes = require("./routes/authRoutes");
 const blogRoutes = require("./routes/blogRoutes");
 
 // MongoDB connection with caching for serverless and production optimizations
-let isConnected = false;
+let cachedConnection = null;
 
 async function connectDB() {
-  if (isConnected) return;
+  // Return cached connection if available and connected
+  if (cachedConnection && mongoose.connection.readyState === 1) {
+    return cachedConnection;
+  }
   
   try {
     const options = {
       maxPoolSize: 10, // Connection pool size for production
       minPoolSize: 2,
       maxIdleTimeMS: 30000,
-      serverSelectionTimeoutMS: 5000,
+      // Longer timeouts for serverless cold starts
+      serverSelectionTimeoutMS: 30000, // 30 seconds for Vercel cold starts
+      connectTimeoutMS: 30000,
       socketTimeoutMS: 45000,
       family: 4, // Use IPv4, skip trying IPv6
+      retryWrites: true,
+      w: 'majority'
     };
     
-    await mongoose.connect(process.env.MONGO_URI, options);
-    isConnected = true;
-    logger.info("✅ Connected to MongoDB Atlas with connection pool");
+    if (mongoose.connection.readyState === 0) {
+      cachedConnection = await mongoose.connect(process.env.MONGO_URI, options);
+      logger.info("✅ Connected to MongoDB Atlas with connection pool");
+    }
     
-    // Log connection events
-    mongoose.connection.on('error', (err) => {
-      logger.error('MongoDB connection error:', err);
-    });
+    // Log connection events (only attach once)
+    if (!mongoose.connection._eventsAttached) {
+      mongoose.connection.on('error', (err) => {
+        logger.error('MongoDB connection error:', err);
+        cachedConnection = null;
+      });
+      
+      mongoose.connection.on('disconnected', () => {
+        logger.warn('MongoDB disconnected. Will reconnect on next request...');
+        cachedConnection = null;
+      });
+      
+      mongoose.connection.on('reconnected', () => {
+        logger.info('MongoDB reconnected');
+      });
+      
+      mongoose.connection._eventsAttached = true;
+    }
     
-    mongoose.connection.on('disconnected', () => {
-      logger.warn('MongoDB disconnected. Attempting to reconnect...');
-      isConnected = false;
-    });
-    
-    mongoose.connection.on('reconnected', () => {
-      logger.info('MongoDB reconnected');
-      isConnected = true;
-    });
-    
+    return cachedConnection;
   } catch (err) {
     logger.error("❌ Database connection error:", err);
-    isConnected = false;
+    cachedConnection = null;
     throw err;
   }
 }
@@ -146,7 +170,12 @@ app.use(async (req, res, next) => {
     await connectDB();
     next();
   } catch (err) {
-    res.status(500).json({ message: "Database connection failed" });
+    logger.error('Failed to connect to database:', err);
+    // More detailed error for debugging
+    res.status(500).json({ 
+      message: "Database connection failed",
+      error: process.env.NODE_ENV === 'production' ? undefined : err.message
+    });
   }
 });
 
@@ -168,16 +197,25 @@ app.get("/health", async (req, res) => {
     message: "OK",
     timestamp: Date.now(),
     mongoStatus: mongoose.connection.readyState === 1 ? "connected" : "disconnected",
+    mongoReadyState: mongoose.connection.readyState, // 0=disconnected, 1=connected, 2=connecting, 3=disconnecting
     environment: process.env.NODE_ENV || "development",
+    hasMongoUri: !!process.env.MONGO_URI,
     memory: process.memoryUsage()
   };
   
   try {
-    // Ping database
-    await mongoose.connection.db.admin().ping();
-    res.status(200).json(healthCheck);
+    // Only ping if already connected to avoid hanging
+    if (mongoose.connection.readyState === 1) {
+      await mongoose.connection.db.admin().ping();
+      healthCheck.dbPing = "success";
+    } else {
+      healthCheck.message = "MongoDB not connected";
+      healthCheck.dbPing = "skipped";
+    }
+    
+    res.status(mongoose.connection.readyState === 1 ? 200 : 503).json(healthCheck);
   } catch (error) {
-    healthCheck.message = "Database connection failed";
+    healthCheck.message = "Database ping failed";
     healthCheck.error = error.message;
     logger.error("Health check failed:", error);
     res.status(503).json(healthCheck);

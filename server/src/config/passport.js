@@ -1,11 +1,18 @@
 const passport = require("passport");
 const GoogleStrategy = require("passport-google-oauth20").Strategy;
 const GitHubStrategy = require("passport-github2").Strategy;
+const mongoose = require("mongoose");
 const User = require("../models/User");
-const adminEmails = require("./adminEmails"); // Assuming you have this config
+const adminEmails = require("./adminEmails");
+const logger = require("./logger");
 
 const handleSocialAuth = async (accessToken, refreshToken, profile, done) => {
   try {
+    // Ensure mongoose is connected before querying
+    if (!mongoose.connection || mongoose.connection.readyState !== 1) {
+      return done(new Error('Database connection not ready. Please try again.'), null);
+    }
+    
     let user;
     
     // Get email from profile - handle cases where email might not be available
@@ -56,6 +63,11 @@ const handleSocialAuth = async (accessToken, refreshToken, profile, done) => {
 
     return done(null, user);
   } catch (err) {
+    logger.error('OAuth authentication error:', {
+      provider: profile?.provider,
+      error: err.message,
+      stack: err.stack
+    });
     return done(err, null);
   }
 };
