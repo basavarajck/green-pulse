@@ -79,7 +79,7 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
       {
         clientID: process.env.GOOGLE_CLIENT_ID,
         clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-        callbackURL: `${process.env.API_URL || "http://localhost:4000"}/auth/google/callback`,
+        callbackURL: `${process.env.API_URL}/auth/google/callback`,
       },
       handleSocialAuth
     )
@@ -95,7 +95,7 @@ if (process.env.GITHUB_CLIENT_ID && process.env.GITHUB_CLIENT_SECRET) {
       {
         clientID: process.env.GITHUB_CLIENT_ID,
         clientSecret: process.env.GITHUB_CLIENT_SECRET,
-        callbackURL: `${process.env.API_URL || "http://localhost:4000"}/auth/github/callback`,
+        callbackURL: `${process.env.API_URL}/auth/github/callback`,
         scope: ["user:email"], // Important for GitHub to get email
       },
       handleSocialAuth
