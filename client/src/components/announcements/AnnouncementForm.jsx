@@ -24,7 +24,8 @@ const AnnouncementForm = ({ onSubmit, onCancel, initialData = {}, loading }) => 
         date: ''
       });
     }
-  }, [initialData]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialData?._id]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -66,7 +67,12 @@ const AnnouncementForm = ({ onSubmit, onCancel, initialData = {}, loading }) => 
       <form onSubmit={handleSubmit} className="grid gap-6">
         {/* Title */}
         <div>
-          <label className="block mb-2 text-sm font-semibold text-green-300">Title *</label>
+          <div className="flex justify-between items-center mb-2">
+            <label className="text-sm font-semibold text-green-300">Title *</label>
+            <span className={`text-xs ${formData.title.length < 3 ? 'text-red-400' : formData.title.length > 200 ? 'text-red-400' : 'text-gray-400'}`}>
+              {formData.title.length}/200 {formData.title.length < 3 && '(min 3)'}
+            </span>
+          </div>
           <input
             name="title"
             value={formData.title}

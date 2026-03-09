@@ -35,7 +35,8 @@ const BlogForm = ({ onSubmit, onCancel, initialData = {}, loading }) => {
         tags: []
       });
     }
-  }, [initialData]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialData?._id]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -61,7 +62,13 @@ const BlogForm = ({ onSubmit, onCancel, initialData = {}, loading }) => {
       alert('Title, author, content, and date are required');
       return;
     }
-    onSubmit(formData);
+
+    // Include _id when editing
+    const submitData = initialData && initialData._id 
+      ? { ...formData, _id: initialData._id }
+      : formData;
+
+    onSubmit(submitData);
   };
 
   if (!isAdmin()) return null;
@@ -87,7 +94,12 @@ const BlogForm = ({ onSubmit, onCancel, initialData = {}, loading }) => {
       <form onSubmit={handleSubmit} className="grid gap-6">
         {/* Title */}
         <div>
-          <label className="block mb-2 text-sm font-semibold text-green-300">Blog Title *</label>
+          <div className="flex justify-between items-center mb-2">
+            <label className="text-sm font-semibold text-green-300">Blog Title *</label>
+            <span className={`text-xs ${formData.title.length < 3 ? 'text-red-400' : formData.title.length > 200 ? 'text-red-400' : 'text-gray-400'}`}>
+              {formData.title.length}/200 {formData.title.length < 3 && '(min 3)'}
+            </span>
+          </div>
           <input
             name="title"
             value={formData.title}
@@ -127,8 +139,9 @@ const BlogForm = ({ onSubmit, onCancel, initialData = {}, loading }) => {
 
         {/* Cover Image */}
         <div>
-          <label className="block mb-2 text-sm font-semibold text-green-300">
-            Cover Image URL
+          <label className="flex items-center gap-2 mb-2 text-sm font-semibold text-green-300">
+            <ImageIcon className="w-4 h-4" />
+            Cover Image URL (Optional)
           </label>
           <input
             name="coverImage"
@@ -141,9 +154,11 @@ const BlogForm = ({ onSubmit, onCancel, initialData = {}, loading }) => {
 
         {/* Content - Simple Text Area */}
         <div>
-          <label className="block mb-2 text-sm font-semibold text-green-300">
-            Blog Content * 
-          </label>
+          <div className="flex justify-between items-center mb-2">
+            <label className="text-sm font-semibold text-green-300">
+              Blog Content * 
+            </label>
+          </div>
           <div className="mb-2 p-3 rounded-lg bg-green-900/20 border border-green-700/30 text-xs text-green-200">
             <div className="flex items-start gap-2">
               <ImageIcon className="w-4 h-4 mt-0.5 flex-shrink-0" />

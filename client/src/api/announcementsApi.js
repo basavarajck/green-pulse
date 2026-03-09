@@ -24,6 +24,11 @@ export const addAnnouncement = async (announcementData) => {
   
   if (!res.ok) {
     const error = await res.json();
+    // If there are validation errors, format them nicely
+    if (error.errors && Array.isArray(error.errors)) {
+      const errorMessages = error.errors.map(e => `${e.path || e.param}: ${e.msg}`).join(', ');
+      throw new Error(errorMessages);
+    }
     throw new Error(error.message || 'Failed to create announcement');
   }
   
@@ -45,6 +50,11 @@ export const updateAnnouncement = async (announcementData) => {
   
   if (!res.ok) {
     const error = await res.json();
+    // If there are validation errors, format them nicely
+    if (error.errors && Array.isArray(error.errors)) {
+      const errorMessages = error.errors.map(e => `${e.path || e.param}: ${e.msg}`).join(', ');
+      throw new Error(errorMessages);
+    }
     throw new Error(error.message || 'Failed to update announcement');
   }
   
@@ -64,6 +74,11 @@ export const deleteAnnouncement = async (id) => {
   
   if (!res.ok) {
     const error = await res.json();
+    // If there are validation errors, format them nicely
+    if (error.errors && Array.isArray(error.errors)) {
+      const errorMessages = error.errors.map(e => `${e.path || e.param}: ${e.msg}`).join(', ');
+      throw new Error(errorMessages);
+    }
     throw new Error(error.message || 'Failed to delete announcement');
   }
   
