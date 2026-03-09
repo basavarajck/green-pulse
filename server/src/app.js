@@ -42,7 +42,7 @@ app.use(morgan('combined', { stream: logger.stream }));
 // Middlewares
 app.use(cors({
   origin: function (origin, callback) {
-    logger.info(`[CORS] Incoming origin: ${origin}`);
+    logger.warn(`[CORS] Incoming origin: ${origin}`);
     const allowedOrigins = [
       "https://green-pulse-ten.vercel.app",
       "https://greenpulsejssstu.vercel.app",
@@ -57,7 +57,7 @@ app.use(cors({
       /^https:\/\/greenpulsejssstu.*\.vercel\.app$/.test(origin) ||
       /^https:\/\/green-pulse.*\.vercel\.app$/.test(origin) ||
       /^https:\/\/greenpulsesjce.*\.vercel\.app$/.test(origin);
-    logger.info(`[CORS] Origin allowed: ${isAllowed}`);
+    logger.warn(`[CORS] Origin allowed: ${isAllowed}`);
     callback(null, isAllowed);
   },
   credentials: true
