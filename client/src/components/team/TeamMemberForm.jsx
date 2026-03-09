@@ -1,6 +1,7 @@
 // src/components/team/TeamMemberForm.jsx
 import React, { useState, useEffect, useRef } from 'react';
 import { UploadCloud, X, User, Mail, Briefcase, Tag, Loader2 } from 'lucide-react';
+import { validateField, getCharCounterClass } from '../../utils/formValidation';
 
 const TeamMemberForm = ({ onSubmit, onCancel, initialData, loading }) => {
   const [form, setForm] = useState({
@@ -76,10 +77,45 @@ const TeamMemberForm = ({ onSubmit, onCancel, initialData, loading }) => {
     e.preventDefault();
     setError('');
 
-    if (!form.name.trim() || !form.role.trim() || !form.email.trim()) {
-      setError('Name, role, and email are required.');
+    // Validate Name (2-100 chars)
+    const nameError = validateField(form.name, { min: 2, max: 100, required: true });
+    if (nameError) {
+      setError(`Name: ${nameError}`);
       return;
     }
+
+    // Validate Email (2-100 chars + valid email format)
+    if (!form.email.trim()) {
+      setError('Email is required.');
+      return;
+    }
+    if (form.email.length < 2 || form.email.length > 100) {
+      setError('Email must be between 2 and 100 characters.');
+      return;
+    }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(form.email)) {
+      setError('Please enter a valid email address.');
+      return;
+    }
+
+    // Validate Role (2-100 chars)
+    const roleError = validateField(form.role, { min: 2, max: 100, required: true });
+    if (roleError) {
+      setError(`Role: ${roleError}`);
+      return;
+    }
+
+    // Validate Designation if provided (2-100 chars)
+    if (form.designation && form.designation.trim()) {
+      const designationError = validateField(form.designation, { min: 2, max: 100, required: false });
+      if (designationError) {
+        setError(`Designation: ${designationError}`);
+        return;
+      }
+    }
+
+    // Image check
     if (!initialData && !imageFile) {
       setError('Please upload a photo for the team member.');
       return;
@@ -89,7 +125,9 @@ const TeamMemberForm = ({ onSubmit, onCancel, initialData, loading }) => {
     formData.append('name', form.name.trim());
     formData.append('role', form.role.trim());
     formData.append('email', form.email.trim());
-    formData.append('designation', form.designation.trim());
+    if (form.designation.trim()) {
+      formData.append('designation', form.designation.trim());
+    }
     if (imageFile) formData.append('image', imageFile);
     if (initialData?._id) formData.append('_id', initialData._id);
 
@@ -164,9 +202,14 @@ const TeamMemberForm = ({ onSubmit, onCancel, initialData, loading }) => {
         <div className="grid gap-4 sm:grid-cols-2">
           {/* Name */}
           <div>
-            <label className="block text-xs font-semibold text-green-400 uppercase tracking-widest mb-1.5">
-              Full Name *
-            </label>
+            <div className="flex justify-between items-center mb-1.5">
+              <label className="text-xs font-semibold text-green-400 uppercase tracking-widest">
+                Full Name *
+              </label>
+              <span className={getCharCounterClass(form.name.length, 2, 100)}>
+                {form.name.length}/100 {form.name.length < 2 && '(min 2)'}
+              </span>
+            </div>
             <div className="relative">
               <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-green-700" />
               <input
@@ -176,6 +219,7 @@ const TeamMemberForm = ({ onSubmit, onCancel, initialData, loading }) => {
                 onChange={handleChange}
                 placeholder="e.g. Priya Sharma"
                 required
+                maxLength={100}
                 className="w-full rounded-lg bg-green-950/50 border border-green-800/50 pl-9 pr-3 py-2.5 text-sm text-green-50 placeholder-gray-600 focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500/40 transition-all"
               />
             </div>
@@ -183,9 +227,14 @@ const TeamMemberForm = ({ onSubmit, onCancel, initialData, loading }) => {
 
           {/* Email */}
           <div>
-            <label className="block text-xs font-semibold text-green-400 uppercase tracking-widest mb-1.5">
-              Email *
-            </label>
+            <div className="flex justify-between items-center mb-1.5">
+              <label className="text-xs font-semibold text-green-400 uppercase tracking-widest">
+                Email *
+              </label>
+              <span className={getCharCounterClass(form.email.length, 2, 100)}>
+                {form.email.length}/100 {form.email.length < 2 && '(min 2)'}
+              </span>
+            </div>
             <div className="relative">
               <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-green-700" />
               <input
@@ -195,6 +244,7 @@ const TeamMemberForm = ({ onSubmit, onCancel, initialData, loading }) => {
                 onChange={handleChange}
                 placeholder="e.g. priya@example.com"
                 required
+                maxLength={100}
                 className="w-full rounded-lg bg-green-950/50 border border-green-800/50 pl-9 pr-3 py-2.5 text-sm text-green-50 placeholder-gray-600 focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500/40 transition-all"
               />
             </div>
@@ -202,9 +252,14 @@ const TeamMemberForm = ({ onSubmit, onCancel, initialData, loading }) => {
 
           {/* Role */}
           <div>
-            <label className="block text-xs font-semibold text-green-400 uppercase tracking-widest mb-1.5">
-              Role / Title *
-            </label>
+            <div className="flex justify-between items-center mb-1.5">
+              <label className="text-xs font-semibold text-green-400 uppercase tracking-widest">
+                Role / Title *
+              </label>
+              <span className={getCharCounterClass(form.role.length, 2, 100)}>
+                {form.role.length}/100 {form.role.length < 2 && '(min 2)'}
+              </span>
+            </div>
             <div className="relative">
               <Briefcase className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-green-700" />
               <input
@@ -214,6 +269,7 @@ const TeamMemberForm = ({ onSubmit, onCancel, initialData, loading }) => {
                 onChange={handleChange}
                 placeholder="e.g. Lead Developer"
                 required
+                maxLength={100}
                 className="w-full rounded-lg bg-green-950/50 border border-green-800/50 pl-9 pr-3 py-2.5 text-sm text-green-50 placeholder-gray-600 focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500/40 transition-all"
               />
             </div>
@@ -221,9 +277,16 @@ const TeamMemberForm = ({ onSubmit, onCancel, initialData, loading }) => {
 
           {/* Designation */}
           <div>
-            <label className="block text-xs font-semibold text-green-400 uppercase tracking-widest mb-1.5">
-              Club Designation
-            </label>
+            <div className="flex justify-between items-center mb-1.5">
+              <label className="text-xs font-semibold text-green-400 uppercase tracking-widest">
+                Club Designation (Optional)
+              </label>
+              {form.designation && (
+                <span className={getCharCounterClass(form.designation.length, 2, 100)}>
+                  {form.designation.length}/100 {form.designation.length > 0 && form.designation.length < 2 && '(min 2)'}
+                </span>
+              )}
+            </div>
             <div className="relative">
               <Tag className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-green-700" />
               <input
@@ -232,6 +295,7 @@ const TeamMemberForm = ({ onSubmit, onCancel, initialData, loading }) => {
                 value={form.designation}
                 onChange={handleChange}
                 placeholder="e.g. Core Member"
+                maxLength={100}
                 className="w-full rounded-lg bg-green-950/50 border border-green-800/50 pl-9 pr-3 py-2.5 text-sm text-green-50 placeholder-gray-600 focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500/40 transition-all"
               />
             </div>

@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, X } from 'lucide-react';
 import { upsertResearch, addProject } from '../../api/researchApi';
+import { validateField, getCharCounterClass } from '../../utils/formValidation';
 
 const ResearchForm = ({ domain, initialData, onSuccess, onCancel }) => {
   const [loading, setLoading] = useState(false);
@@ -37,6 +38,21 @@ const ResearchForm = ({ domain, initialData, onSuccess, onCancel }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // Validate title (3-200 chars)
+    const titleError = validateField(formData.title, { min: 3, max: 200, required: true });
+    if (titleError) {
+      alert(`Title: ${titleError}`);
+      return;
+    }
+
+    // Validate description (10-2000 chars)
+    const descError = validateField(formData.description, { min: 10, max: 2000, required: true });
+    if (descError) {
+      alert(`Description: ${descError}`);
+      return;
+    }
+
     try {
       setLoading(true);
       await upsertResearch(formData);
@@ -51,9 +67,28 @@ const ResearchForm = ({ domain, initialData, onSuccess, onCancel }) => {
 
   const handleAddProject = async (e) => {
     e.preventDefault();
-    if (!newProject.title || !newProject.lead) {
-      alert('Project title and lead are required');
+
+    // Validate project title (3-200 chars)
+    const titleError = validateField(newProject.title, { min: 3, max: 200, required: true });
+    if (titleError) {
+      alert(`Project Title: ${titleError}`);
       return;
+    }
+
+    // Validate lead researcher (2-100 chars)
+    const leadError = validateField(newProject.lead, { min: 2, max: 100, required: true });
+    if (leadError) {
+      alert(`Lead Researcher: ${leadError}`);
+      return;
+    }
+
+    // Validate description if provided (10-2000 chars)
+    if (newProject.description && newProject.description.trim()) {
+      const descError = validateField(newProject.description, { min: 10, max: 2000, required: false });
+      if (descError) {
+        alert(`Project Description: ${descError}`);
+        return;
+      }
     }
 
     try {
@@ -112,23 +147,35 @@ const ResearchForm = ({ domain, initialData, onSuccess, onCancel }) => {
       {/* Basic Info Form */}
       <form onSubmit={handleSubmit} className="space-y-6 mb-8 pb-8 border-b border-green-900/30">
         <div>
-          <label className="block mb-2 text-sm font-semibold text-green-300">Domain Title *</label>
+          <div className="flex justify-between items-center mb-2">
+            <label className="text-sm font-semibold text-green-300">Domain Title *</label>
+            <span className={getCharCounterClass(formData.title.length, 3, 200)}>
+              {formData.title.length}/200 {formData.title.length < 3 && '(min 3)'}
+            </span>
+          </div>
           <input
             value={formData.title}
             onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
             required
+            maxLength={200}
             className="w-full px-4 py-3 rounded-xl border border-green-800/50 bg-gray-900/50 text-white focus:border-green-500 focus:ring-2 focus:ring-green-500/50"
             placeholder="e.g. Air Pollution Research"
           />
         </div>
 
         <div>
-          <label className="block mb-2 text-sm font-semibold text-green-300">Description *</label>
+          <div className="flex justify-between items-center mb-2">
+            <label className="text-sm font-semibold text-green-300">Description *</label>
+            <span className={getCharCounterClass(formData.description.length, 10, 2000)}>
+              {formData.description.length}/2000 {formData.description.length < 10 && '(min 10)'}
+            </span>
+          </div>
           <textarea
             value={formData.description}
             onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
             required
             rows={4}
+            maxLength={2000}
             className="w-full px-4 py-3 rounded-xl border border-green-800/50 bg-gray-900/50 text-white focus:border-green-500 focus:ring-2 focus:ring-green-500/50 resize-vertical"
             placeholder="Brief description of research work..."
           />
@@ -231,20 +278,32 @@ const ResearchForm = ({ domain, initialData, onSuccess, onCancel }) => {
           
           <div className="grid md:grid-cols-2 gap-4">
             <div>
-              <label className="block mb-2 text-sm font-semibold text-green-300">Project Title *</label>
+              <div className="flex justify-between items-center mb-2">
+                <label className="text-sm font-semibold text-green-300">Project Title *</label>
+                <span className={getCharCounterClass(newProject.title.length, 3, 200)}>
+                  {newProject.title.length}/200 {newProject.title.length < 3 && '(min 3)'}
+                </span>
+              </div>
               <input
                 value={newProject.title}
                 onChange={(e) => setNewProject(prev => ({ ...prev, title: e.target.value }))}
+                maxLength={200}
                 className="w-full px-4 py-2 rounded-lg border border-green-800/50 bg-gray-900/50 text-white text-sm"
                 placeholder="Project name..."
               />
             </div>
 
             <div>
-              <label className="block mb-2 text-sm font-semibold text-green-300">Lead Researcher *</label>
+              <div className="flex justify-between items-center mb-2">
+                <label className="text-sm font-semibold text-green-300">Lead Researcher *</label>
+                <span className={getCharCounterClass(newProject.lead.length, 2, 100)}>
+                  {newProject.lead.length}/100 {newProject.lead.length < 2 && '(min 2)'}
+                </span>
+              </div>
               <input
                 value={newProject.lead}
                 onChange={(e) => setNewProject(prev => ({ ...prev, lead: e.target.value }))}
+                maxLength={100}
                 className="w-full px-4 py-2 rounded-lg border border-green-800/50 bg-gray-900/50 text-white text-sm"
                 placeholder="Dr. Name..."
               />
@@ -252,11 +311,19 @@ const ResearchForm = ({ domain, initialData, onSuccess, onCancel }) => {
           </div>
 
           <div>
-            <label className="block mb-2 text-sm font-semibold text-green-300">Description</label>
+            <div className="flex justify-between items-center mb-2">
+              <label className="text-sm font-semibold text-green-300">Description (Optional)</label>
+              {newProject.description && (
+                <span className={getCharCounterClass(newProject.description.length, 10, 2000)}>
+                  {newProject.description.length}/2000 {newProject.description.length > 0 && newProject.description.length < 10 && '(min 10)'}
+                </span>
+              )}
+            </div>
             <textarea
               value={newProject.description}
               onChange={(e) => setNewProject(prev => ({ ...prev, description: e.target.value }))}
               rows={3}
+              maxLength={2000}
               className="w-full px-4 py-2 rounded-lg border border-green-800/50 bg-gray-900/50 text-white text-sm resize-vertical"
               placeholder="Project details..."
             />

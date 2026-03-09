@@ -146,12 +146,13 @@ const AnnouncementsPage = () => {
           </div>
         ) : (
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {announcements.map((announcement) => (
+            {announcements?.map((announcement) => (
               <AnnouncementCard
                 key={announcement._id}
                 announcement={announcement}
                 onDelete={handleDelete}
                 onEdit={handleEdit}
+                isEditing={editingAnnouncement?._id === announcement._id}
               />
             ))}
           </div>

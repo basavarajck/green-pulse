@@ -6,7 +6,12 @@ const teamMemberSchema = new mongoose.Schema({
   role:        { type: String, required: true },
   email:       { type: String, required: true },
   designation: { type: String, default: "" },
-  image:       { type: String, required: true }, // relative path e.g. "uploads/team/abc.jpg"
+  image:       { type: String, required: true },
 }, { timestamps: true });
+
+// Indexes for performance
+teamMemberSchema.index({ role: 1 }); // For filtering by role
+teamMemberSchema.index({ email: 1 }); // For email lookups
+teamMemberSchema.index({ name: 1 }); // For alphabetical sorting
 
 module.exports = mongoose.model("TeamMember", teamMemberSchema);

@@ -22,7 +22,8 @@ const BlogsPage = () => {
     try {
       setLoading(true);
       const data = await getBlogs();
-      setBlogs(data);
+      // Backend returns { blogs, pagination }
+      setBlogs(data.blogs || data);
       setError('');
     } catch (err) {
       setError(err.message);
@@ -123,6 +124,7 @@ const BlogsPage = () => {
         {/* Admin Form */}
         {(isAdmin() || editingBlog) && (
           <BlogForm
+            key={editingBlog?._id || 'new'}
             onSubmit={editingBlog ? handleUpdate : handleCreate}
             onCancel={() => setEditingBlog(null)}
             initialData={editingBlog}
@@ -146,12 +148,13 @@ const BlogsPage = () => {
           </div>
         ) : (
           <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-            {blogs.map((blog) => (
+            {blogs?.map((blog) => (
               <BlogCard
                 key={blog._id}
                 blog={blog}
                 onDelete={handleDelete}
                 onEdit={handleEdit}
+                isEditing={editingBlog?._id === blog._id}
               />
             ))}
           </div>

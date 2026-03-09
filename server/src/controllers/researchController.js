@@ -1,12 +1,14 @@
 // controllers/researchController.js
 const Research = require('../models/Research');
+const logger = require('../config/logger');
 
 // GET all research domains
 exports.getAllResearch = async (req, res) => {
   try {
-    const research = await Research.find({ isActive: true });
+    const research = await Research.find({ isActive: true }).lean();
     res.json(research);
   } catch (err) {
+    logger.error('Error fetching research data:', err);
     res.status(500).json({ message: 'Error fetching research data', error: err.message });
   }
 };
@@ -15,7 +17,7 @@ exports.getAllResearch = async (req, res) => {
 exports.getResearchByDomain = async (req, res) => {
   try {
     const { domain } = req.params;
-    const research = await Research.findOne({ domain, isActive: true });
+    const research = await Research.findOne({ domain, isActive: true }).lean();
     
     if (!research) {
       return res.status(404).json({ message: 'Research domain not found' });
@@ -23,6 +25,7 @@ exports.getResearchByDomain = async (req, res) => {
     
     res.json(research);
   } catch (err) {
+    logger.error('Error fetching research domain:', err);
     res.status(500).json({ message: 'Error fetching research domain', error: err.message });
   }
 };
@@ -38,8 +41,10 @@ exports.upsertResearch = async (req, res) => {
       { new: true, upsert: true, runValidators: true }
     );
     
+    logger.info(`Research domain upserted: ${domain} by ${req.user.id}`);
     res.json({ message: 'Research domain updated', research });
   } catch (err) {
+    logger.error('Error updating research domain:', err);
     res.status(500).json({ message: 'Error updating research domain', error: err.message });
   }
 };

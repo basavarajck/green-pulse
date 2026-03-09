@@ -8,7 +8,9 @@ passport.use(
     {
       clientID: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-      callbackURL: "https://green-pulse-ten.vercel.app/auth/google/callback"
+      callbackURL: process.env.VERCEL 
+        ? `${process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'https://green-pulse-ten.vercel.app'}/auth/google/callback`
+        : "http://localhost:4000/auth/google/callback",
     },
     async (accessToken, refreshToken, profile, done) => {
       try {

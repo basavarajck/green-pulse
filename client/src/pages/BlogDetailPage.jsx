@@ -165,7 +165,7 @@ const BlogDetailPage = () => {
             </h1>
 
             {/* Tags */}
-            {blog.tags && blog.tags.length > 0 && (
+            {blog?.tags && blog.tags.length > 0 && (
               <div className="flex flex-wrap items-center gap-2">
                 <Tag className="w-4 h-4 text-green-400" />
                 {blog.tags.map((tag, idx) => (

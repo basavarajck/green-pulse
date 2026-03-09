@@ -1,14 +1,13 @@
 // src/pages/EventsPage.jsx - COMPLETE with Upcoming Filter
 import React, { useState, useEffect } from 'react';
 import { ChevronLeft, Calendar, MapPin } from 'lucide-react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import EventCard from '../components/events/EventCard';
 import EventForm from '../components/events/EventForm';
 import { getEvents, addEvent, deleteEvent, updateEvent } from '../api/eventsApi';
 import { isAdmin, isLoggedIn } from '../utils/auth';
 
 const EventsPage = () => {
-  const navigate = useNavigate();
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [formLoading, setFormLoading] = useState(false);
@@ -172,6 +171,7 @@ const EventsPage = () => {
         {/* Admin Form */}
         {(isAdmin() || editingEvent) && (
           <EventForm
+            key={editingEvent?._id || 'new'}
             onSubmit={editingEvent ? handleUpdate : handleCreate}
             onCancel={() => setEditingEvent(null)}
             initialData={editingEvent}
@@ -200,12 +200,13 @@ const EventsPage = () => {
           </div>
         ) : (
           <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {filteredEvents.map((event) => (
+            {filteredEvents?.map((event) => (
               <EventCard
                 key={event._id}
                 event={event}
                 onDelete={handleDelete}
                 onEdit={handleEdit}
+                isEditing={editingEvent?._id === event._id}
               />
             ))}
           </div>

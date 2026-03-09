@@ -1,9 +1,9 @@
 // src/components/events/EventCard.jsx
 import React, {useState} from 'react';
-import { ExternalLink, Trash2 } from 'lucide-react';
+import { ExternalLink, Trash2, Calendar } from 'lucide-react';
 import { isAdmin } from '../../utils/auth';
 
-const EventCard = ({ event, onDelete, onEdit }) => {
+const EventCard = ({ event, onDelete, onEdit, isEditing }) => {
   const { _id, title, description, date, image, link, isUpcoming } = event;
   const [imageError, setImageError] = useState(false);
   
@@ -44,7 +44,7 @@ const EventCard = ({ event, onDelete, onEdit }) => {
       {image && !imageError ? (
         <div className="mb-3 relative group">
           <img
-            src={image}
+            src={getImageUrl(image)}
             alt={title}
             onError={handleImageError}
             loading="lazy"
@@ -112,7 +112,12 @@ const EventCard = ({ event, onDelete, onEdit }) => {
           )}
           <button
             onClick={() => onDelete(_id)}
-            className="flex-1 flex items-center justify-center gap-1 px-3 py-2 rounded-lg bg-red-900/50 border border-red-700/50 text-red-200 text-xs font-medium hover:bg-red-800/70 transition-all"
+            disabled={isEditing}
+            className={`flex-1 flex items-center justify-center gap-1 px-3 py-2 rounded-lg text-xs font-medium transition-all ${
+              isEditing
+                ? 'bg-gray-800/30 border border-gray-700/30 text-gray-500 cursor-not-allowed opacity-50'
+                : 'bg-red-900/50 border border-red-700/50 text-red-200 hover:bg-red-800/70'
+            }`}
           >
             <Trash2 className="w-3.5 h-3.5" />
             Delete

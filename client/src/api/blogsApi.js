@@ -40,7 +40,7 @@ export const updateBlog = async (blogData) => {
   const token = getToken();
   if (!token) throw new Error('Not authorized');
   
-  const res = await fetch(`${API_BASE}/blogs`, {
+  const res = await fetch(`${API_BASE}/blogs/${blogData._id}`, {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',

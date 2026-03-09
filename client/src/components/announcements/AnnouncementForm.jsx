@@ -37,11 +37,46 @@ const AnnouncementForm = ({ onSubmit, onCancel, initialData = {}, loading }) => 
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!formData.title.trim() || !formData.content.trim() || !formData.date.trim()) {
-      alert('All fields are required');
+    
+    // Validate Title
+    if (!formData.title || !formData.title.trim()) {
+      alert('❌ Announcement title is required');
       return;
     }
-    onSubmit(formData);
+    if (formData.title.trim().length < 3) {
+      alert('❌ Announcement title must be at least 3 characters long');
+      return;
+    }
+    if (formData.title.trim().length > 200) {
+      alert('❌ Announcement title must be less than 200 characters');
+      return;
+    }
+    
+    // Validate Content
+    if (!formData.content || !formData.content.trim()) {
+      alert('❌ Announcement content is required');
+      return;
+    }
+    if (formData.content.trim().length < 10) {
+      alert('❌ Announcement content must be at least 10 characters long');
+      return;
+    }
+    if (formData.content.trim().length > 5000) {
+      alert('❌ Announcement content must be less than 5000 characters');
+      return;
+    }
+    
+    // Validate Date
+    if (!formData.date || !formData.date.trim()) {
+      alert('❌ Announcement date is required');
+      return;
+    }
+    
+    // Include _id when editing
+    const submitData = initialData && initialData._id 
+      ? { ...formData, _id: initialData._id }
+      : formData;
+    onSubmit(submitData);
   };
 
   if (!isAdmin()) return null;
@@ -78,6 +113,7 @@ const AnnouncementForm = ({ onSubmit, onCancel, initialData = {}, loading }) => 
             value={formData.title}
             onChange={handleChange}
             required
+            maxLength={200}
             className="w-full px-4 py-3 rounded-xl border border-green-800/50 bg-gray-900/50 text-white placeholder-gray-500 focus:border-green-500 focus:ring-2 focus:ring-green-500/50 transition-all"
             placeholder="e.g. Important: Campus Closed Tomorrow"
           />
@@ -98,13 +134,19 @@ const AnnouncementForm = ({ onSubmit, onCancel, initialData = {}, loading }) => 
 
         {/* Content */}
         <div>
-          <label className="block mb-2 text-sm font-semibold text-green-300">Content *</label>
+          <div className="flex justify-between items-center mb-2">
+            <label className="text-sm font-semibold text-green-300">Content *</label>
+            <span className={`text-xs ${formData.content.length < 10 ? 'text-red-400' : formData.content.length > 5000 ? 'text-red-400' : 'text-gray-400'}`}>
+              {formData.content.length}/5000 {formData.content.length < 10 && '(min 10)'}
+            </span>
+          </div>
           <textarea
             name="content"
             value={formData.content}
             onChange={handleChange}
             required
             rows={5}
+            maxLength={5000}
             className="w-full px-4 py-3 rounded-xl border border-green-800/50 bg-gray-900/50 text-white placeholder-gray-500 focus:border-green-500 focus:ring-2 focus:ring-green-500/50 transition-all resize-vertical"
             placeholder="Write your announcement details here..."
           />

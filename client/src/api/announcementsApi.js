@@ -39,7 +39,7 @@ export const updateAnnouncement = async (announcementData) => {
   const token = getToken();
   if (!token) throw new Error('Not authorized');
   
-  const res = await fetch(`${API_BASE}/announcements`, {
+  const res = await fetch(`${API_BASE}/announcements/${announcementData._id}`, {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
