@@ -40,26 +40,20 @@ app.use(compression());
 app.use(morgan('combined', { stream: logger.stream }));
 
 // Middlewares
+// CORS configuration - allow frontend to access backend
+const allowedOrigins = [
+  "https://green-pulse-ten.vercel.app",
+  "https://greenpulsejssstu.vercel.app",
+  "https://greenpulsesjce.vercel.app",
+  "http://localhost:5173",
+  "http://localhost:5174",
+  /^https:\/\/greenpulsesjce.*\.vercel\.app$/,
+  /^https:\/\/greenpulsejssstu.*\.vercel\.app$/,
+  /^https:\/\/green-pulse.*\.vercel\.app$/
+];
+
 app.use(cors({
-  origin: function (origin, callback) {
-    logger.warn(`[CORS] Incoming origin: ${origin}`);
-    const allowedOrigins = [
-      "https://green-pulse-ten.vercel.app",
-      "https://greenpulsejssstu.vercel.app",
-      "https://greenpulsesjce.vercel.app",
-      "http://localhost:5173",
-      "http://localhost:5174"
-    ];
-    // Allow requests with no origin (e.g. server-to-server, Postman)
-    // Allow exact matches, and any Vercel preview deployment for the project
-    const isAllowed = !origin ||
-      allowedOrigins.includes(origin) ||
-      /^https:\/\/greenpulsejssstu.*\.vercel\.app$/.test(origin) ||
-      /^https:\/\/green-pulse.*\.vercel\.app$/.test(origin) ||
-      /^https:\/\/greenpulsesjce.*\.vercel\.app$/.test(origin);
-    logger.warn(`[CORS] Origin allowed: ${isAllowed}`);
-    callback(null, isAllowed);
-  },
+  origin: allowedOrigins,
   credentials: true
 }));
 app.use(express.json());
