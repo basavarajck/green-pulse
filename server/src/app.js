@@ -99,43 +99,52 @@ const authRoutes = require("./routes/authRoutes");
 const blogRoutes = require("./routes/blogRoutes");
 
 // MongoDB connection with caching for serverless and production optimizations
-let isConnected = false;
+let cachedConnection = null;
 
 async function connectDB() {
-  if (isConnected) return;
+  // Check if already connected using Mongoose's readyState
+  // 0 = disconnected, 1 = connected, 2 = connecting, 3 = disconnecting
+  if (mongoose.connection.readyState === 1) return;
+  
+  // If we have a cached promise, wait for it
+  if (cachedConnection) return cachedConnection;
+  
+  if (!process.env.MONGO_URI) {
+    throw new Error("MONGO_URI environment variable is not set");
+  }
   
   try {
     const options = {
       maxPoolSize: 10, // Connection pool size for production
       minPoolSize: 2,
       maxIdleTimeMS: 30000,
-      serverSelectionTimeoutMS: 5000,
+      serverSelectionTimeoutMS: 10000, // Increased for cold starts
       socketTimeoutMS: 45000,
       family: 4, // Use IPv4, skip trying IPv6
     };
     
-    await mongoose.connect(process.env.MONGO_URI, options);
-    isConnected = true;
+    cachedConnection = mongoose.connect(process.env.MONGO_URI, options);
+    await cachedConnection;
     logger.info("✅ Connected to MongoDB Atlas with connection pool");
     
     // Log connection events
     mongoose.connection.on('error', (err) => {
       logger.error('MongoDB connection error:', err);
+      cachedConnection = null;
     });
     
     mongoose.connection.on('disconnected', () => {
-      logger.warn('MongoDB disconnected. Attempting to reconnect...');
-      isConnected = false;
+      logger.warn('MongoDB disconnected. Will reconnect on next request.');
+      cachedConnection = null;
     });
     
     mongoose.connection.on('reconnected', () => {
       logger.info('MongoDB reconnected');
-      isConnected = true;
     });
     
   } catch (err) {
-    logger.error("❌ Database connection error:", err);
-    isConnected = false;
+    cachedConnection = null;
+    logger.error("❌ Database connection error:", err.message);
     throw err;
   }
 }
@@ -146,7 +155,11 @@ app.use(async (req, res, next) => {
     await connectDB();
     next();
   } catch (err) {
-    res.status(500).json({ message: "Database connection failed" });
+    logger.error("DB middleware error:", err.message);
+    res.status(500).json({ 
+      message: "Database connection failed",
+      error: process.env.NODE_ENV !== 'production' ? err.message : undefined
+    });
   }
 });
 
